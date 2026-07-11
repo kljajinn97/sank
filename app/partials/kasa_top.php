@@ -21,6 +21,7 @@ $kasa_title = $kasa_title ?? 'POS';
 <link rel="apple-touch-icon" href="/assets/icon.svg">
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
+<script src="<?= url('assets/js/ui.js') ?>"></script>
 </head>
 <body class="kasa-body">
 <header class="kasa-top">
@@ -32,7 +33,7 @@ $kasa_title = $kasa_title ?? 'POS';
   <div class="kasa-top__right">
     <?php if ($pu): ?>
       <span class="badge badge--teal"><?= e(trim($pu['ime'].' '.($pu['prezime']??''))) ?></span>
-      <a class="btn btn--ghost btn--sm" href="<?= url('kasa') ?>?lock=1">🔒 Zaključaj</a>
+      <a class="btn btn--ghost btn--sm" href="<?= url('kasa') ?>?lock=1"><?= ico('lock',16) ?> Zaključaj</a>
     <?php endif; ?>
     <button class="iconbtn" onclick="var d=document.documentElement,k=d.getAttribute('data-theme')==='dark';if(k){d.removeAttribute('data-theme');localStorage.setItem('sank_theme','light')}else{d.setAttribute('data-theme','dark');localStorage.setItem('sank_theme','dark')}" title="Tema">
       <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
@@ -41,6 +42,6 @@ $kasa_title = $kasa_title ?? 'POS';
   </div>
 </header>
 <main class="kasa-main">
-<?php foreach (flash_take() as $f): ?>
-  <div class="flash flash--<?= $f['type']==='error'?'error':'success' ?>" style="max-width:640px;margin:0 auto 14px"><?= e($f['msg']) ?></div>
-<?php endforeach; ?>
+<?php $flashes = flash_take(); if ($flashes): ?>
+<script>document.addEventListener('DOMContentLoaded',function(){<?php foreach ($flashes as $f): ?>SankUI.toast(<?= json_encode($f['msg']) ?>,<?= json_encode($f['type']==='error'?'error':'success') ?>);<?php endforeach; ?>});</script>
+<?php endif; ?>

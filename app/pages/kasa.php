@@ -44,7 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['pos_lokal'] = (int)$device['lokal_id'];
             $_SESSION['pos_token'] = $device['token'];
             db_run('UPDATE pos_uredjaji SET poslednja_aktivnost=NOW() WHERE id=?', [$device['id']]);
-            redirect(url('pos'));
+            // Radnik ide PRAVO na novi brzi (šank) račun
+            db_run('INSERT INTO racuni (lokal_id,sto_id,status,korisnik_id) VALUES (?,NULL,"otvoren",?)', [$device['lokal_id'], $ulogovan['id']]);
+            redirect(url('pos') . '?racun=' . (int)db()->lastInsertId());
         }
         flash('error','Pogrešan PIN.');
         redirect(url('kasa'));
@@ -74,7 +76,7 @@ require __DIR__ . '/../partials/kasa_top.php';
 
     <?php else: ?>
       <!-- PIN LOCK -->
-      <div class="sidebar__logo" style="width:56px;height:56px;font-size:26px;margin:0 auto 14px">🔒</div>
+      <div class="sidebar__logo" style="width:56px;height:56px;margin:0 auto 14px"><?= ico('lock',26) ?></div>
       <h2>Unesi PIN</h2>
       <p class="muted">Prijavi se svojim PIN-om da počneš rad.</p>
       <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>

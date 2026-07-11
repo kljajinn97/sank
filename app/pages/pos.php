@@ -258,6 +258,14 @@ $active = 'pos';
 
 // ==================== ŠTAMPA RAČUNA (predračun) ====================
 $rid = (int)($_GET['racun'] ?? 0);
+
+// Nazad na početni: obriši prazan otvoren račun (da se ne gomilaju)
+if ($rid && isset($_GET['nazad'])) {
+    if ((int)db_val('SELECT COUNT(*) FROM racun_stavke WHERE racun_id=?', [$rid]) === 0)
+        db_run('DELETE FROM racuni WHERE id=? AND lokal_id=? AND status="otvoren"', [$rid,$lid]);
+    redirect(url('pos'));
+}
+
 if ($rid && !empty($_GET['stampa'])) {
     $rr = db_row('SELECT r.*, s.naziv AS sto FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id WHERE r.id=? AND r.lokal_id=?', [$rid,$lid]);
     if ($rr) {
@@ -327,23 +335,23 @@ if ($rid) {
     require $SHELL_TOP;
     ?>
     <div class="page-head">
-      <div><a href="<?= url('pos') ?>" class="muted" style="font-size:.85rem">← Nazad na stolove</a>
+      <div><a href="<?= url('pos') ?>?racun=<?= $rid ?>&nazad=1" class="btn btn--ghost btn--sm" style="margin-bottom:8px"><?= ico('back',16) ?> Nazad</a>
         <h1><?= e($stoNaziv) ?></h1><p>Račun #<?= $rid ?> · otvoren</p></div>
     </div>
 
     <div class="toolbar" style="margin-bottom:14px">
-      <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= $rid ?>&stampa=1" target="_blank">🖨 Predračun</a>
-      <button class="btn btn--ghost btn--sm" onclick="mPremesti.showModal()">↔ Premesti sto</button>
-      <?php if ($openOther): ?><button class="btn btn--ghost btn--sm" onclick="mSpoji.showModal()">⇄ Spoji</button><?php endif; ?>
-      <button class="btn btn--ghost btn--sm" onclick="openPodeli()">✂ Podeli</button>
+      <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= $rid ?>&stampa=1" target="_blank"><?= ico('print',16) ?> Predračun</a>
+      <button class="btn btn--ghost btn--sm" onclick="mPremesti.showModal()"><?= ico('move',16) ?> Premesti sto</button>
+      <?php if ($openOther): ?><button class="btn btn--ghost btn--sm" onclick="mSpoji.showModal()"><?= ico('merge',16) ?> Spoji</button><?php endif; ?>
+      <button class="btn btn--ghost btn--sm" onclick="openPodeli()"><?= ico('split',16) ?> Podeli</button>
     </div>
 
     <div class="pos-layout">
       <!-- Korpa -->
       <div class="pos-cart card">
         <div class="card__head"><div class="card__title">Račun</div>
-          <form method="post" onsubmit="return doStorno(this)" style="margin:0"><?= csrf_field() ?><input type="hidden" name="akcija" value="storno"><input type="hidden" name="racun_id" value="<?= $rid ?>"><input type="hidden" name="razlog">
-            <button class="btn btn--ghost btn--sm" style="color:var(--danger)">Storno</button></form></div>
+          <form method="post" onsubmit="return ukPromptSubmit(this,'razlog','Unesi razlog storniranja računa:',{title:'Storno računa',ok:'Storniraj',busy:'Storniram…'})" style="margin:0"><?= csrf_field() ?><input type="hidden" name="akcija" value="storno"><input type="hidden" name="racun_id" value="<?= $rid ?>"><input type="hidden" name="razlog">
+            <button class="btn btn--ghost btn--sm" style="color:var(--danger)"><?= ico('storno',15) ?> Storno</button></form></div>
         <div id="cartItems" class="pos-cart__items"></div>
         <div class="pos-cart__foot">
           <div class="pos-cart__line"><span>Međuzbir</span><span id="cartSub">0,00</span></div>
@@ -353,9 +361,9 @@ if ($rid) {
           </div>
           <div class="pos-cart__total"><span>Ukupno</span><span class="amt" id="cartTotal">0,00</span></div>
           <div class="pos-pay">
-            <button class="btn btn--ghost" onclick="naplati('kes')">💵 Keš</button>
-            <button class="btn btn--ghost" onclick="naplati('kartica')">💳 Kartica</button>
-            <button class="pos-pay__split" onclick="openSplit()">➗ Podeli plaćanje</button>
+            <button class="btn btn--ghost" onclick="naplati('kes')"><?= ico('cash',18) ?> Keš</button>
+            <button class="btn btn--ghost" onclick="naplati('kartica')"><?= ico('card',18) ?> Kartica</button>
+            <button class="pos-pay__split" onclick="openSplit()"><?= ico('split',18) ?> Podeli plaćanje</button>
           </div>
         </div>
       </div>
@@ -425,8 +433,8 @@ if ($rid) {
       <div class="card__body">
         <div style="text-align:right;font-size:1.3rem;font-weight:800;margin-bottom:14px">Ukupno: <span id="splitTotal">0,00</span></div>
         <div class="form-row">
-          <div class="field"><label class="label">💵 Keš</label><input class="input" type="number" step="0.01" id="splitKes" oninput="splitCalc('kes')"></div>
-          <div class="field"><label class="label">💳 Kartica</label><input class="input" type="number" step="0.01" id="splitKartica" oninput="splitCalc('kartica')"></div>
+          <div class="field"><label class="label"><?= ico('cash',16) ?> Keš</label><input class="input" type="number" step="0.01" id="splitKes" oninput="splitCalc('kes')"></div>
+          <div class="field"><label class="label"><?= ico('card',16) ?> Kartica</label><input class="input" type="number" step="0.01" id="splitKartica" oninput="splitCalc('kartica')"></div>
         </div>
         <div class="help" id="splitInfo"></div>
       </div>
@@ -468,14 +476,15 @@ if ($rid) {
       document.querySelectorAll('#catTabs a').forEach(a=>a.classList.remove('is-active'));el.classList.add('is-active');
       document.querySelectorAll('#prodGrid .ptile').forEach(t=>{t.style.display=(cat==0||t.dataset.cat==cat)?'':'none';});
     }
-    function doStorno(f){ var r=prompt('Razlog storniranja računa (obavezno):'); if(!r||!r.trim())return false; f.razlog.value=r.trim(); return true; }
     function naplati(nacin){
-      if(!document.querySelectorAll('#cartItems .cart-row').length){alert('Račun je prazan.');return;}
-      if(!confirm('Naplatiti račun ('+nacin+')?'))return;
-      var f=document.getElementById('naplataForm'); f.nacin.value=nacin; f.kes.value=''; f.kartica.value=''; f.submit();
+      if(!document.querySelectorAll('#cartItems .cart-row').length){SankUI.toast('Račun je prazan.','error');return;}
+      SankUI.confirm('Naplatiti račun ('+(nacin==='kes'?'keš':'kartica')+')?',{title:'Naplata',ok:'Naplati'}).then(function(ok){
+        if(!ok)return; var f=document.getElementById('naplataForm'); f.nacin.value=nacin; f.kes.value=''; f.kartica.value='';
+        SankUI.loading('Naplaćujem…'); f.submit();
+      });
     }
     function openSplit(){
-      if(!window.CART||!window.CART.stavke.length){alert('Račun je prazan.');return;}
+      if(!window.CART||!window.CART.stavke.length){SankUI.toast('Račun je prazan.','error');return;}
       var t=window.CART.total; document.getElementById('splitTotal').textContent=fmt(t);
       document.getElementById('splitKes').value=''; document.getElementById('splitKartica').value=t.toFixed(2);
       splitCalc('kartica'); document.getElementById('mSplit').showModal();
@@ -487,15 +496,16 @@ if ($rid) {
       if(edited==='kes'){ kar=Math.max(0,+(t-kes).toFixed(2)); document.getElementById('splitKartica').value=kar.toFixed(2); }
       else { kes=Math.max(0,+(t-kar).toFixed(2)); document.getElementById('splitKes').value=kes.toFixed(2); }
       var zbir=+(kes+kar).toFixed(2);
-      document.getElementById('splitInfo').textContent = Math.abs(zbir-t)<0.01 ? '✔ Zbir se poklapa' : ('Zbir: '+fmt(zbir)+' (treba '+fmt(t)+')');
+      document.getElementById('splitInfo').innerHTML = Math.abs(zbir-t)<0.01 ? '<span style="color:var(--ok);font-weight:700">Zbir se poklapa</span>' : ('Zbir: '+fmt(zbir)+' (treba '+fmt(t)+')');
     }
     function naplatiSplit(){
       var kes=parseFloat(document.getElementById('splitKes').value)||0, kar=parseFloat(document.getElementById('splitKartica').value)||0;
-      var f=document.getElementById('naplataForm'); f.nacin.value=''; f.kes.value=kes; f.kartica.value=kar; f.submit();
+      var f=document.getElementById('naplataForm'); f.nacin.value=''; f.kes.value=kes; f.kartica.value=kar;
+      SankUI.loading('Naplaćujem…'); f.submit();
     }
     function openPodeli(){
       const st=(window.CART&&window.CART.stavke)||[];
-      if(!st.length){alert('Račun je prazan.');return;}
+      if(!st.length){SankUI.toast('Račun je prazan.','error');return;}
       document.getElementById('podeliList').innerHTML=st.map(s=>`
         <label class="flex items-center gap-2" style="padding:8px;border:1px solid var(--border);border-radius:9px;margin-bottom:6px;cursor:pointer">
           <input type="checkbox" name="stavke[]" value="${s.id}">
@@ -526,9 +536,9 @@ $danasnji = $sef ? db_all('SELECT r.*, COALESCE(s.naziv,"Šank") AS sto FROM rac
 require $SHELL_TOP;
 ?>
 <div class="page-head">
-  <div><h1>POS / Kasa</h1><p>Brza prodaja i stolovi.</p></div>
-  <form method="post" style="margin:0"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" value="0">
-    <button class="btn btn--primary">＋ Nova brza prodaja (šank)</button></form>
+  <div><h1>POS / Kasa</h1><p>Brzi račun, stolovi i računi.</p></div>
+  <form method="post" style="margin:0" onsubmit="SankUI.loading('Otvaram…')"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" value="0">
+    <button class="btn btn--primary"><?= ico('bolt',18) ?> Brzi račun</button></form>
 </div>
 
 <div class="stats mb-2">
@@ -561,21 +571,20 @@ require $SHELL_TOP;
         <td><span class="badge badge--muted"><?= e(ucfirst($rc['nacin_placanja'] ?: '')) ?></span></td>
         <td class="num"><?= novac($rc['ukupno']) ?></td>
         <td class="text-right" style="white-space:nowrap">
-          <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= (int)$rc['id'] ?>&stampa=1" target="_blank">🖨</a>
-          <form method="post" style="display:inline" onsubmit="return refundRazlog(this)"><?= csrf_field() ?><input type="hidden" name="akcija" value="refund"><input type="hidden" name="id" value="<?= (int)$rc['id'] ?>"><input type="hidden" name="razlog">
-            <button class="btn btn--ghost btn--sm" style="color:var(--danger)">Povrat</button></form>
+          <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= (int)$rc['id'] ?>&stampa=1" target="_blank"><?= ico('print',15) ?></a>
+          <form method="post" style="display:inline" onsubmit="return ukPromptSubmit(this,'razlog','Razlog povrata računa:',{title:'Povrat računa',ok:'Povrat',danger:true,busy:'Obrađujem povrat…'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="refund"><input type="hidden" name="id" value="<?= (int)$rc['id'] ?>"><input type="hidden" name="razlog">
+            <button class="btn btn--ghost btn--sm" style="color:var(--danger)"><?= ico('refund',15) ?> Povrat</button></form>
         </td>
       </tr>
     <?php endforeach; ?>
     </tbody>
   </table></div>
 </div>
-<script>function refundRazlog(f){var r=prompt('Razlog povrata (obavezno):');if(!r||!r.trim())return false;f.razlog.value=r.trim();return confirm('Napraviti povrat računa? Zalihe se vraćaju, pazar se umanjuje.');}</script>
 <?php endif; ?>
 
 <div class="card">
   <div class="card__head"><div class="card__title">Stolovi</div>
-    <?php if ($sef): ?><button class="btn btn--ghost btn--sm" onclick="mSto.showModal()">＋ Dodaj sto</button><?php endif; ?></div>
+    <?php if ($sef): ?><button class="btn btn--ghost btn--sm" onclick="mSto.showModal()"><?= ico('plus',16) ?> Dodaj sto</button><?php endif; ?></div>
   <div class="card__body">
     <?php if (!$stolovi): ?>
       <div class="empty">Još nema stolova. <?= $sef?'Dodaj prvi sto ili koristi „šank" za brzu prodaju.':'' ?></div>
@@ -610,7 +619,7 @@ require $SHELL_TOP;
 </dialog>
 <form id="delStoForm" method="post" style="display:none"><?= csrf_field() ?><input type="hidden" name="akcija" value="del_sto"><input type="hidden" name="id" id="delStoId"></form>
 <script>
-function delSto(e,id){e.preventDefault();if(!confirm('Obrisati sto?'))return;document.getElementById('delStoId').value=id;document.getElementById('delStoForm').submit();}
+function delSto(e,id){e.preventDefault();SankUI.confirm('Obrisati ovaj sto?',{title:'Brisanje stola',ok:'Obriši',danger:true}).then(function(ok){if(!ok)return;document.getElementById('delStoId').value=id;SankUI.loading('Brišem…');document.getElementById('delStoForm').submit();});}
 </script>
 <?php endif; ?>
 
