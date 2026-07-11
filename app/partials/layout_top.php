@@ -55,8 +55,8 @@ function nav_item(string $key, string $label, string $route, string $active): vo
 <?php if (!is_super_admin() && !empty($u['lokal_boja'])): ?>
 <style>:root{--brand: <?= e($u['lokal_boja']) ?>;}</style>
 <?php endif; ?>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>">
-<script src="<?= url('assets/js/ui.js') ?>"></script>
+<link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
+<script src="<?= asset('assets/js/ui.js') ?>"></script>
 </head>
 <body>
 <div class="app">

@@ -72,7 +72,7 @@ catch (Throwable $e) { $db_err = $e->getMessage(); }
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Instalacija · Sank</title>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
 </head>
 <body style="background:var(--bg);">
 <div style="max-width:520px;margin:6vh auto;padding:20px;">

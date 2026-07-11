@@ -13,7 +13,7 @@ $kasa_title = $kasa_title ?? 'POS';
 <title><?= e($kasa_title) ?> · Sank POS</title>
 <script>(function(){try{var t=localStorage.getItem('sank_theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 <?php if (!empty($lok['boja'])): ?><style>:root{--brand: <?= e($lok['boja']) ?>;}</style><?php endif; ?>
-<link rel="stylesheet" href="<?= url('assets/css/app.css') ?>">
+<link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="<?= e($lok['boja'] ?? '#0d9488') ?>">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@ $kasa_title = $kasa_title ?? 'POS';
 <link rel="apple-touch-icon" href="/assets/icon.svg">
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
-<script src="<?= url('assets/js/ui.js') ?>"></script>
+<script src="<?= asset('assets/js/ui.js') ?>"></script>
 </head>
 <body class="kasa-body">
 <header class="kasa-top">

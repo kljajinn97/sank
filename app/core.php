@@ -90,6 +90,14 @@ function url(string $path = ''): string
     return '/' . ltrim($path, '/');
 }
 
+/** URL do statičkog fajla sa verzijom (cache-busting posle deploy-a) */
+function asset(string $path): string
+{
+    $full = __DIR__ . '/../' . ltrim($path, '/');   // core.php je u /app, assets u rootu
+    $v = @filemtime($full) ?: time();
+    return url($path) . '?v=' . $v;
+}
+
 /** Inline SVG ikonica (stroke, currentColor). Zamena za emoji. */
 function ico(string $name, int $size = 20): string
 {
