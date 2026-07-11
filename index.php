@@ -33,6 +33,7 @@ $routes = [
     'fakture'    => 'fakture.php',
     'troskovi'   => 'troskovi.php',
     'izvestaji'  => 'izvestaji.php',
+    'dan'        => 'dan.php',
     'kep'        => 'kep.php',
     'audit'      => 'audit.php',
     'zalihe'     => 'zalihe.php',

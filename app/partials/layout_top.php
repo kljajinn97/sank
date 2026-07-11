@@ -25,6 +25,7 @@ function nav_icon(string $k): string {
       'troskovi'  => '<path d="M2 5h20v14H2zM2 10h20M6 15h4"/>',
       'izvestaji' => '<path d="M3 3v18h18M7 15l4-4 3 3 5-6"/>',
       'kep'       => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+      'dan'       => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>',
       'audit'     => '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>',
       'narudzbenice'=> '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/>',
       'cene'      => '<path d="M20.6 3.4 12 12l-1.4-1.4M2 12h4M12 2v4M12 18v4M2 12a10 10 0 0 0 10 10"/>',
@@ -108,6 +109,7 @@ function nav_item(string $key, string $label, string $route, string $active): vo
         <div class="nav__label">Analitika</div>
         <?php
           nav_item('izvestaji','Izveštaji','izvestaji',$active);
+          nav_item('dan','Zatvaranje dana','dan',$active);
           nav_item('kep','KEP knjiga','kep',$active);
           nav_item('audit','Dnevnik izmena','audit',$active);
         ?>
