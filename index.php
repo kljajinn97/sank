@@ -34,6 +34,7 @@ $routes = [
     'troskovi'   => 'troskovi.php',
     'izvestaji'  => 'izvestaji.php',
     'dan'        => 'dan.php',
+    'pdv'        => 'pdv.php',
     'kep'        => 'kep.php',
     'audit'      => 'audit.php',
     'zalihe'     => 'zalihe.php',

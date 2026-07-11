@@ -39,7 +39,7 @@ function racun_json(int $rid, int $lid): void {
     echo json_encode([
         'stavke' => array_map(fn($s)=>[
             'id'=>(int)$s['id'],'naziv'=>$s['naziv'],'cena'=>(float)$s['cena'],
-            'kolicina'=>(float)$s['kolicina'],'iznos'=>(float)$s['iznos']
+            'kolicina'=>(float)$s['kolicina'],'iznos'=>(float)$s['iznos'],'napomena'=>$s['napomena'] ?? ''
         ], $d['stavke'] ?? []),
         'sub'=>$d['sub'] ?? 0, 'popust'=>(float)($d['racun']['popust_pct'] ?? 0), 'total'=>$d['total'] ?? 0,
     ]);
@@ -109,6 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($kol <= 0) { db_run('DELETE FROM racun_stavke WHERE id=?', [$sid]); audit('uklonjena_stavka','racun',$rid,$st['naziv']); }
             else db_run('UPDATE racun_stavke SET kolicina=?, iznos=? WHERE id=?', [$kol, round($kol*(float)$st['cena'],2), $sid]);
         }
+        if ($ajax) racun_json($rid,$lid); redirect(url('pos').'?racun='.$rid);
+    }
+
+    if ($akcija === 'napomena' && $r) {
+        $sid = (int)($_POST['stavka_id'] ?? 0);
+        $nap = post('napomena');
+        db_run('UPDATE racun_stavke SET napomena=? WHERE id=? AND racun_id=?', [$nap ?: null, $sid, $rid]);
         if ($ajax) racun_json($rid,$lid); redirect(url('pos').'?racun='.$rid);
     }
 
@@ -307,6 +314,7 @@ if ($rid && !empty($_GET['stampa'])) {
             <?php foreach($st as $x): ?>
               <tr><td colspan="2" class="b"><?= e($x['naziv']) ?></td></tr>
               <tr><td><?= rtrim(rtrim(number_format((float)$x['kolicina'],3,',','.'),'0'),',') ?> × <?= novac($x['cena']) ?></td><td class="r"><?= novac($x['iznos']) ?></td></tr>
+              <?php if(!empty($x['napomena'])): ?><tr><td colspan="2" style="font-size:11px;color:#555">- <?= e($x['napomena']) ?></td></tr><?php endif; ?>
             <?php endforeach; ?>
           </table>
           <hr>
@@ -456,6 +464,10 @@ if ($rid) {
     <script>
     const RID=<?= $rid ?>, CSRF=<?= json_encode(csrf_token()) ?>;
     function fmt(n){return (n||0).toLocaleString('sr-RS',{minimumFractionDigits:2,maximumFractionDigits:2});}
+    function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+    var NOTE_SVG='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+    async function setQtyDirect(id){ var v=await SankUI.prompt('Unesi količinu:',{title:'Količina',ok:'Sačuvaj'}); if(v===null)return; var n=parseFloat(String(v).replace(',','.')); if(isNaN(n)||n<0){SankUI.toast('Neispravna količina','error');return;} render(await api('set_qty',{stavka_id:id,kolicina:n})); }
+    async function setNote(id){ var st=((window.CART&&window.CART.stavke)||[]).find(function(x){return x.id==id;}); var v=await SankUI.prompt('Napomena za stavku:',{title:'Napomena',ok:'Sačuvaj',value:st?st.napomena:''}); if(v===null)return; render(await api('napomena',{stavka_id:id,napomena:v})); }
     async function api(akcija,extra){
       const body=new URLSearchParams(Object.assign({akcija,ajax:1,racun_id:RID,_csrf:CSRF},extra||{}));
       const res=await fetch('<?= url('pos') ?>',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
@@ -467,14 +479,20 @@ if ($rid) {
       if(!d.stavke.length){box.innerHTML='<div class="empty" style="padding:30px 10px">Dodaj proizvode dodirom →</div>';}
       else{box.innerHTML=d.stavke.map(s=>`
         <div class="cart-row">
-          <div class="cart-row__info"><div class="cart-row__name">${s.naziv}</div><div class="cart-row__price muted">${fmt(s.cena)} × ${(+s.kolicina).toString().replace('.',',')}</div></div>
+          <div class="cart-row__info">
+            <div class="cart-row__name">${esc(s.naziv)}</div>
+            <div class="cart-row__price muted">${fmt(s.cena)}${s.napomena?` · <span style="color:var(--brand-700)">${esc(s.napomena)}</span>`:''}</div>
+          </div>
           <div class="cart-row__qty">
             <button onclick="setQty(${s.id},${(+s.kolicina-1)})">−</button>
-            <span>${(+s.kolicina).toString().replace('.',',')}</span>
+            <span onclick="setQtyDirect(${s.id})" title="Unesi količinu">${(+s.kolicina).toString().replace('.',',')}</span>
             <button onclick="setQty(${s.id},${(+s.kolicina+1)})">+</button>
           </div>
           <div class="cart-row__sum">${fmt(s.iznos)}</div>
-          <button class="cart-row__del" onclick="setQty(${s.id},0)">×</button>
+          <div class="cart-row__act">
+            <button class="cart-row__note" onclick="setNote(${s.id})" title="Napomena">${NOTE_SVG}</button>
+            <button class="cart-row__del" onclick="setQty(${s.id},0)" title="Ukloni">×</button>
+          </div>
         </div>`).join('');}
       var ct=document.getElementById('cartTotal'); ct.textContent=fmt(d.total);
       ct.classList.remove('bump'); void ct.offsetWidth; ct.classList.add('bump');
