@@ -144,9 +144,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         db_run('INSERT INTO zalihe_promet (lokal_id,artikal_id,tip,kolicina,razlog,korisnik_id) VALUES (?,?,"ulaz",?,?,?)', [$lid,$s['artikal_id'],$qty,'Povrat račun #'.$refId,$uid]);
                     }
                 }
-                // Negativan pazar (umanjenje prometa) — po istom načinu plaćanja
-                db_run('INSERT INTO pazar (lokal_id,datum,smena,korisnik_id,iznos,kes,kartica,napomena) VALUES (?,CURDATE(),"cela",?,?,?,?,?)',
-                       [$lid,$uid,-(float)$rr['ukupno'],-(float)$rr['placeno_kes'],-(float)$rr['placeno_kartica'],'Povrat POS #'.$refId]);
+                // Umanji dnevni POS pazar (za dan kad je račun naplaćen)
+                $dan = date('Y-m-d', strtotime($rr['closed_at'] ?: 'now'));
+                $expaz = db_row('SELECT id FROM pazar WHERE lokal_id=? AND datum=? AND napomena="POS promet" LIMIT 1', [$lid,$dan]);
+                if ($expaz) db_run('UPDATE pazar SET iznos=iznos-?, kes=kes-?, kartica=kartica-? WHERE id=?',
+                                   [(float)$rr['ukupno'],(float)$rr['placeno_kes'],(float)$rr['placeno_kartica'],$expaz['id']]);
                 db_run('UPDATE racuni SET status="refundiran", refund_razlog=? WHERE id=?', [$razlog,$refId]);
                 $pdo->commit();
                 audit('refund','racun',$refId,$razlog.' ('.novac($rr['ukupno']).')');
@@ -232,9 +234,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             db_run('UPDATE racuni SET status="placen", nacin_placanja=?, placeno_kes=?, placeno_kartica=?, ukupno=?, closed_at=NOW() WHERE id=?',
                    [$nacin,$kes,$kartica,$total,$rid]);
-            // Upiši u pazar (keš/kartica)
-            db_run('INSERT INTO pazar (lokal_id,datum,smena,korisnik_id,iznos,kes,kartica,napomena) VALUES (?,CURDATE(),"cela",?,?,?,?,?)',
-                   [$lid,$uid,$total,$kes,$kartica,'POS račun #'.$rid]);
+            // Pazar = DNEVNI zbir (ceo dan), NE red po računu. Upsert jednog reda za danas.
+            $expaz = db_row('SELECT id FROM pazar WHERE lokal_id=? AND datum=CURDATE() AND napomena="POS promet" LIMIT 1', [$lid]);
+            if ($expaz) db_run('UPDATE pazar SET iznos=iznos+?, kes=kes+?, kartica=kartica+? WHERE id=?', [$total,$kes,$kartica,$expaz['id']]);
+            else db_run('INSERT INTO pazar (lokal_id,datum,smena,korisnik_id,iznos,kes,kartica,napomena) VALUES (?,CURDATE(),"cela",?,?,?,?,"POS promet")', [$lid,$uid,$total,$kes,$kartica]);
             $pdo->commit();
             audit('naplata','racun',$rid,'Iznos '.novac($total).' · '.$nacin);
             flash('success','Račun #'.$rid.' naplaćen ('.novac($total).' · '.$nacin.').');
@@ -521,6 +524,69 @@ if ($rid) {
     return;
 }
 
+// ==================== SVI RAČUNI ====================
+if (isset($_GET['racuni'])) {
+    $fst = $_GET['status'] ?? 'sve';
+    $dan = $_GET['dan'] ?? date('Y-m-d');
+    $where = 'r.lokal_id=?'; $par = [$lid];
+    if ($dan !== 'sve') { $where .= ' AND DATE(r.created_at)=?'; $par[] = $dan; }
+    if (in_array($fst, ['otvoren','placen','storniran','refundiran'], true)) { $where .= ' AND r.status=?'; $par[] = $fst; }
+    $lista = db_all("SELECT r.*, COALESCE(s.naziv,'Šank') AS sto, TRIM(CONCAT(COALESCE(k.ime,''),' ',COALESCE(k.prezime,''))) AS konobar
+                     FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id LEFT JOIN korisnici k ON k.id=r.korisnik_id
+                     WHERE $where ORDER BY r.id DESC LIMIT 300", $par);
+    $stBadge = ['otvoren'=>['Otvoren','warn'],'placen'=>['Plaćen','ok'],'storniran'=>['Storniran','muted'],'refundiran'=>['Refundiran','danger']];
+    $qbase = url('pos').'?racuni=1&dan='.urlencode($dan);
+
+    require $SHELL_TOP;
+    ?>
+    <div class="page-head">
+      <div><a href="<?= url('pos') ?>" class="btn btn--ghost btn--sm" style="margin-bottom:8px"><?= ico('back',16) ?> Nazad</a>
+        <h1>Računi</h1><p>Pregled računa, kopija, storno i povrat.</p></div>
+    </div>
+    <form class="toolbar" method="get" action="<?= url('pos') ?>">
+      <input type="hidden" name="racuni" value="1">
+      <input class="input" type="date" name="dan" value="<?= $dan==='sve'?'':e($dan) ?>" onchange="this.form.submit()" style="width:auto">
+      <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racuni=1&dan=sve&status=<?= e($fst) ?>">Svi datumi</a>
+      <div class="spacer"></div>
+      <div class="tabs">
+        <?php foreach (['sve'=>'Svi','otvoren'=>'Otvoreni','placen'=>'Plaćeni','storniran'=>'Storno','refundiran'=>'Povrat'] as $k=>$lbl): ?>
+          <a href="<?= $qbase ?>&status=<?= $k ?>" class="<?= $fst===$k?'is-active':'' ?>"><?= $lbl ?></a>
+        <?php endforeach; ?>
+      </div>
+    </form>
+    <div class="card"><div class="table-wrap"><table class="table">
+      <thead><tr><th>#</th><th>Sto</th><th>Vreme</th><th>Konobar</th><th class="num">Iznos</th><th>Način</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+      <?php if (!$lista): ?><tr><td colspan="8"><div class="empty">Nema računa za izabrani filter.</div></td></tr>
+      <?php else: foreach ($lista as $rc): [$sl,$sc] = $stBadge[$rc['status']] ?? [$rc['status'],'muted']; ?>
+        <tr>
+          <td><strong>#<?= (int)$rc['id'] ?></strong> <?php if($rc['fiskalizovan']):?><span class="badge badge--ok" title="Fiskalizovan"><?= ico('check',12) ?></span><?php endif;?></td>
+          <td><?= e($rc['sto']) ?></td>
+          <td class="muted"><?= date('d.m. H:i', strtotime($rc['closed_at'] ?: $rc['created_at'])) ?></td>
+          <td class="muted"><?= e($rc['konobar'] ?: '—') ?></td>
+          <td class="num"><?= novac($rc['ukupno']) ?></td>
+          <td><?= $rc['nacin_placanja'] ? '<span class="badge badge--muted">'.e(ucfirst($rc['nacin_placanja'])).'</span>' : '—' ?></td>
+          <td><span class="badge badge--<?= $sc ?>"><?= e($sl) ?></span></td>
+          <td class="text-right" style="white-space:nowrap">
+            <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= (int)$rc['id'] ?>&stampa=1" target="_blank" title="Kopija"><?= ico('print',15) ?></a>
+            <?php if ($rc['status']==='otvoren'): ?>
+              <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= (int)$rc['id'] ?>">Otvori</a>
+              <form method="post" style="display:inline" onsubmit="return ukPromptSubmit(this,'razlog','Razlog storniranja:',{title:'Storno',ok:'Storniraj',danger:true})"><?= csrf_field() ?><input type="hidden" name="akcija" value="storno"><input type="hidden" name="racun_id" value="<?= (int)$rc['id'] ?>"><input type="hidden" name="razlog">
+                <button class="btn btn--ghost btn--sm" style="color:var(--danger)"><?= ico('storno',15) ?></button></form>
+            <?php elseif ($rc['status']==='placen' && $sef): ?>
+              <form method="post" style="display:inline" onsubmit="return ukPromptSubmit(this,'razlog','Razlog povrata:',{title:'Povrat',ok:'Povrat',danger:true})"><?= csrf_field() ?><input type="hidden" name="akcija" value="refund"><input type="hidden" name="id" value="<?= (int)$rc['id'] ?>"><input type="hidden" name="razlog">
+                <button class="btn btn--ghost btn--sm" style="color:var(--danger)"><?= ico('refund',15) ?> Povrat</button></form>
+            <?php endif; ?>
+          </td>
+        </tr>
+      <?php endforeach; endif; ?>
+      </tbody>
+    </table></div></div>
+    <?php
+    require $SHELL_BOT;
+    return;
+}
+
 // ==================== POČETNI EKRAN (STOLOVI) ====================
 $stolovi = db_all('SELECT s.*, r.id AS racun_id, r.ukupno AS racun_ukupno
                    FROM stolovi s
@@ -537,8 +603,11 @@ require $SHELL_TOP;
 ?>
 <div class="page-head">
   <div><h1>POS / Kasa</h1><p>Brzi račun, stolovi i računi.</p></div>
-  <form method="post" style="margin:0" onsubmit="SankUI.loading('Otvaram…')"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" value="0">
-    <button class="btn btn--primary"><?= ico('bolt',18) ?> Brzi račun</button></form>
+  <div class="flex gap-2">
+    <a class="btn btn--ghost" href="<?= url('pos') ?>?racuni=1"><?= ico('receipt',18) ?> Računi</a>
+    <form method="post" style="margin:0" onsubmit="SankUI.loading('Otvaram…')"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" value="0">
+      <button class="btn btn--primary"><?= ico('bolt',18) ?> Brzi račun</button></form>
+  </div>
 </div>
 
 <div class="stats mb-2">
