@@ -1,9 +1,9 @@
 ---
 deployment:
   tasks:
-    # Poddomen sank.ress.rs → document root /home/kljajinc/sank.ress.rs
-    - export DEPLOYPATH=/home/kljajinc/sank.ress.rs/
-    - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -R ./* $DEPLOYPATH
-    - /bin/cp ./.htaccess $DEPLOYPATH
-    - /bin/rm -f $DEPLOYPATH/router.dev.php $DEPLOYPATH/.cpanel.yml $DEPLOYPATH/.gitattributes $DEPLOYPATH/.gitignore
+    # $HOME = /home/KORISNIK (cPanel ga sam postavlja) → poddomen sank.ress.rs
+    - export DEPLOYPATH="$HOME/sank.ress.rs/"
+    - /bin/mkdir -p "$DEPLOYPATH"
+    - /bin/cp -R ./* "$DEPLOYPATH"
+    - /bin/cp ./.htaccess "$DEPLOYPATH"
+    - /bin/rm -f "$DEPLOYPATH/router.dev.php" "$DEPLOYPATH/.cpanel.yml" "$DEPLOYPATH/.gitattributes" "$DEPLOYPATH/.gitignore"
