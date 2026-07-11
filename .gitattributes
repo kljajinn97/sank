@@ -1,0 +1,7 @@
+# Normalizuj kraj reda na LF u repou (server je Linux)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    # PODESI DEPLOYPATH prema svom nalogu:
+    #  - glavni domen:      /home/KORISNIK/public_html/
+    #  - poddomen/addon:    /home/KORISNIK/putanja_do_foldera/
+    - export DEPLOYPATH=/home/kljajinc/public_html/
+    - /bin/cp -R ./* $DEPLOYPATH
+    - /bin/cp ./.htaccess $DEPLOYPATH
+    - /bin/rm -f $DEPLOYPATH/router.dev.php $DEPLOYPATH/.cpanel.yml

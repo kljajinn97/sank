@@ -1,0 +1,16 @@
+{
+  "name": "Sank POS",
+  "short_name": "Sank POS",
+  "description": "POS kasa za ugostiteljstvo",
+  "start_url": "/kasa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f1720",
+  "theme_color": "#0d9488",
+  "lang": "sr",
+  "icons": [
+    { "src": "/assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/assets/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

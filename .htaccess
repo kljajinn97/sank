@@ -1,0 +1,31 @@
+# ============================================================
+#  SANK — Apache konfiguracija (cPanel)
+# ============================================================
+
+# Uključi rewrite engine
+RewriteEngine On
+
+# Ne diraj postojeće fajlove i foldere (assets, setup.php...)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Sve ostalo šalji na index.php sa ?r=putanja
+RewriteRule ^(.*)$ index.php?r=$1 [QSA,L]
+
+# ---------- Bezbednost ----------
+# Zabrani direktan pristup app/ i sql/ folderima
+RewriteRule ^(app|sql)(/|$) - [F,L]
+
+# Sakrij osetljive fajlove
+<FilesMatch "\.(sql|md|log|ini)$">
+    Require all denied
+</FilesMatch>
+
+# Blokiraj listanje foldera
+Options -Indexes
+
+# PWA — ispravan MIME za manifest
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>

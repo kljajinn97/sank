@@ -1,0 +1,12 @@
+# Lokalna konfiguracija (na serveru se kreira jednom, ne prepisuje se deploy-om)
+/app/config.php
+
+# Dev-only (samo za lokalni php -S server)
+/router.dev.php
+/.claude/
+
+# Sistemsko
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
