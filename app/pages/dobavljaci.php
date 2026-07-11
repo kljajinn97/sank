@@ -58,7 +58,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <?php if ($mozeMenjati): ?>
         <td class="text-right" style="white-space:nowrap">
           <button class="btn btn--ghost btn--sm" onclick='openDob(<?= json_encode($d, JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>Izmeni</button>
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati dobavljača?')">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati dobavljača?',{danger:true,ok:'Obriši'})">
             <?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $d['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">Obriši</button>
           </form>

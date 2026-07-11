@@ -74,7 +74,7 @@ require __DIR__ . '/../partials/layout_top.php';
           <td class="muted"><?= datum($k['created_at']) ?></td>
           <td class="text-right">
             <button class="btn btn--ghost btn--sm" onclick="navigator.clipboard&&navigator.clipboard.writeText('<?= e($k['kod']) ?>');this.textContent='Kopirano ✓'">Kopiraj</button>
-            <form method="post" style="display:inline" onsubmit="return confirm('Obrisati kod?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="del_kod"><input type="hidden" name="id" value="<?= $k['id'] ?>">
+            <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati kod?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="del_kod"><input type="hidden" name="id" value="<?= $k['id'] ?>">
               <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
           </td>
         </tr>
@@ -97,7 +97,7 @@ require __DIR__ . '/../partials/layout_top.php';
           <td class="text-right" style="white-space:nowrap">
             <form method="post" style="display:inline"><?= csrf_field() ?><input type="hidden" name="akcija" value="toggle_uredjaj"><input type="hidden" name="id" value="<?= $u['id'] ?>">
               <button class="btn btn--ghost btn--sm"><?= $u['status']==='aktivan'?'Blokiraj':'Odblokiraj' ?></button></form>
-            <form method="post" style="display:inline" onsubmit="return confirm('Ukloniti uređaj? Tražiće ponovnu aktivaciju.')"><?= csrf_field() ?><input type="hidden" name="akcija" value="del_uredjaj"><input type="hidden" name="id" value="<?= $u['id'] ?>">
+            <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Ukloniti uređaj? Tražiće ponovnu aktivaciju.',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="del_uredjaj"><input type="hidden" name="id" value="<?= $u['id'] ?>">
               <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
           </td>
         </tr>

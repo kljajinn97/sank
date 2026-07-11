@@ -39,7 +39,7 @@ require __DIR__ . '/app/partials/layout_top.php';
   <?php if ($rezultat): ?>
     <?php $greske = array_filter($rezultat, fn($r)=>!$r['ok']); ?>
     <div class="flash flash--<?= $greske?'error':'success' ?>" style="margin-bottom:16px">
-      <?= $greske ? 'Neke migracije nisu prošle — vidi ispod.' : '✔ Sve migracije su uspešno primenjene.' ?>
+      <?= $greske ? 'Neke migracije nisu prošle — vidi ispod.' : 'Sve migracije su uspešno primenjene.' ?>
     </div>
     <div class="table-wrap"><table class="table">
       <thead><tr><th>Fajl</th><th>Status</th></tr></thead>

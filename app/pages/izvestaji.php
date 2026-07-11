@@ -101,8 +101,8 @@ require __DIR__ . '/../partials/layout_top.php';
 <div class="page-head no-print">
   <div><h1>Izveštaji i analitika</h1><p>Promet, troškovi i profit — pregled i izvoz.</p></div>
   <div class="flex gap-2">
-    <a class="btn btn--ghost" href="<?= url('izvestaji') ?>?mesec=<?= sprintf('%04d-%02d',$gy,$gm) ?>&export=csv">⬇ CSV (Excel)</a>
-    <button class="btn btn--ghost" onclick="window.print()">🖨 Štampaj / PDF</button>
+    <a class="btn btn--ghost" href="<?= url('izvestaji') ?>?mesec=<?= sprintf('%04d-%02d',$gy,$gm) ?>&export=csv"><?= ico('download',16) ?> CSV (Excel)</a>
+    <button class="btn btn--ghost" onclick="window.print()"><?= ico('print',16) ?> Štampaj / PDF</button>
   </div>
 </div>
 

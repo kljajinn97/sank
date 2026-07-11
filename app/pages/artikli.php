@@ -128,7 +128,7 @@ require __DIR__ . '/../partials/layout_top.php';
         </div>
         <div class="ptile__body">
           <div class="ptile__name"><?= e($a['naziv']) ?></div>
-          <div class="ptile__sub"><?= e($a['jedinica_mere']) ?> · zaliha <?= kolq($a['zaliha']) ?> <?= $nisko?'⚠️':'' ?></div>
+          <div class="ptile__sub"><?= e($a['jedinica_mere']) ?> · zaliha <?= kolq($a['zaliha']) ?><?= $nisko?' <span style="color:var(--warn);font-weight:700">nisko</span>':'' ?></div>
           <div class="ptile__price"><?= novac($a['prodajna_cena']) ?></div>
         </div>
       </div>
@@ -160,7 +160,7 @@ require __DIR__ . '/../partials/layout_top.php';
               "nabavna_cena"=>$a["nabavna_cena"],"prodajna_cena"=>$a["prodajna_cena"],
               "min_zaliha"=>$a["min_zaliha"],"kategorija_id"=>$a["kategorija_id"],"boja"=>$a["boja"],"poreska_oznaka"=>$a["poreska_oznaka"]
           ], JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>Izmeni</button>
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati artikal?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $a['id'] ?>">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati artikal?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $a['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
         </td>
         <?php endif; ?>

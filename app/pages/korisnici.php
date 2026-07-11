@@ -118,7 +118,7 @@ require __DIR__ . '/../partials/layout_top.php';
             <?php if (!$jaSam): ?>
             <form method="post" style="display:inline"><?= csrf_field() ?><input type="hidden" name="akcija" value="status"><input type="hidden" name="id" value="<?= $k['id'] ?>">
               <button class="btn btn--ghost btn--sm"><?= $k['status']==='aktivan'?'Deaktiviraj':'Aktiviraj' ?></button></form>
-            <form method="post" style="display:inline" onsubmit="return confirm('Obrisati nalog?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $k['id'] ?>">
+            <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati nalog?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $k['id'] ?>">
               <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
             <?php endif; ?>
           <?php else: ?><span class="muted">—</span><?php endif; ?>

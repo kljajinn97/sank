@@ -105,14 +105,14 @@ if ($viewId) {
             <button class="btn btn--ghost">Označi poslatom</button></form>
         <?php endif; ?>
         <?php if($n['status']!=='primljena'): ?>
-          <button class="btn btn--primary" onclick="mPrimi.showModal()">✔ Primi robu (faktura)</button>
+          <button class="btn btn--primary" onclick="mPrimi.showModal()"><?= ico('check',16) ?> Primi robu (faktura)</button>
         <?php endif; ?>
       </div>
     </div>
 
     <div class="card">
       <div class="card__head"><div class="card__title">Stavke</div>
-        <form method="post" onsubmit="return confirm('Obrisati narudžbenicu?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $viewId ?>">
+        <form method="post" onsubmit="return ukConfirmSubmit(this,'Obrisati narudžbenicu?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $viewId ?>">
           <button class="btn btn--ghost btn--sm" style="color:var(--danger)">Obriši</button></form></div>
       <div class="table-wrap"><table class="table">
         <thead><tr><th>Artikal</th><th class="num">Količina</th><th>JM</th><th class="num">Cena</th><th class="num">Iznos</th></tr></thead>
@@ -154,7 +154,7 @@ require __DIR__ . '/../partials/layout_top.php';
 
 <?php if ($niski): ?>
 <div class="card mb-2" style="border-color:var(--warn)">
-  <div class="card__head"><div class="card__title">🔔 Predlog nabavke — <?= count($niski) ?> artikala ima nisku zalihu</div>
+  <div class="card__head"><div class="card__title"><?= ico('warn',16) ?> Predlog nabavke — <?= count($niski) ?> artikala ima nisku zalihu</div>
     <button class="btn btn--primary btn--sm" onclick="predlog()">Napravi narudžbenicu od predloga</button></div>
   <div class="table-wrap"><table class="table">
     <thead><tr><th>Artikal</th><th class="num">Zaliha</th><th class="num">Min.</th><th class="num">Predlog</th></tr></thead>

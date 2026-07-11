@@ -23,7 +23,7 @@ require __DIR__ . '/../partials/layout_top.php';
       <label class="label" style="margin:0">Godina:</label>
       <input class="input" type="number" name="god" value="<?= $god ?>" min="2000" max="2100" style="width:110px" onchange="this.form.submit()">
     </form>
-    <button class="btn btn--ghost" onclick="window.print()">🖨 Štampaj / PDF</button>
+    <button class="btn btn--ghost" onclick="window.print()"><?= ico('print',16) ?> Štampaj / PDF</button>
   </div>
 </div>
 

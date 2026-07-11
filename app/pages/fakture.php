@@ -175,7 +175,7 @@ if ($viewId) {
           <button class="btn btn--primary" name="puno" value="1">Plaćeno u celosti</button>
         </form>
         <?php elseif ($f['status']==='placena'): ?>
-          <div class="flash flash--success" style="margin-top:16px">✔ Faktura je u potpunosti plaćena.</div>
+          <div class="flash flash--success" style="margin-top:16px"><?= ico('check',15) ?> Faktura je u potpunosti plaćena.</div>
         <?php endif; ?>
       </div></div>
     </div>
@@ -183,7 +183,7 @@ if ($viewId) {
     <div class="card">
       <div class="card__head"><div class="card__title">Stavke fakture</div>
         <?php if ($mozeMenjati): ?>
-        <form method="post" onsubmit="return confirm('Obrisati celu fakturu? Zalihe će biti vraćene.')">
+        <form method="post" onsubmit="return ukConfirmSubmit(this,'Obrisati celu fakturu? Zalihe će biti vraćene.',{danger:true,ok:'Obriši'})">
           <?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $f['id'] ?>">
           <button class="btn btn--ghost btn--sm" style="color:var(--danger)">Obriši fakturu</button>
         </form>

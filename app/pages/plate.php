@@ -120,7 +120,7 @@ require __DIR__ . '/../partials/layout_top.php';
             <form method="post" style="display:inline"><?= csrf_field() ?><input type="hidden" name="akcija" value="ponisti"><input type="hidden" name="id" value="<?= $p['id'] ?>"><input type="hidden" name="mesec" value="<?= e($mesec) ?>">
               <button class="btn btn--ghost btn--sm">Poništi</button></form>
           <?php endif; ?>
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati obračun?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $p['id'] ?>">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati obračun?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $p['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
         </td>
       </tr>

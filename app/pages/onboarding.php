@@ -49,7 +49,7 @@ $active = '';
 require __DIR__ . '/../partials/layout_top.php';
 ?>
 <div class="page-head">
-  <div><h1>Dobrodošao u Sank 👋</h1><p>Podesi svoj lokal za par minuta i kreni sa radom.</p></div>
+  <div><h1>Dobrodošao u Sank</h1><p>Podesi svoj lokal za par minuta i kreni sa radom.</p></div>
 </div>
 
 <div class="card mb-2"><div class="card__body">
@@ -59,7 +59,7 @@ require __DIR__ . '/../partials/layout_top.php';
   <div class="progress" style="height:10px"><span style="width:<?= $procenat ?>%"></span></div>
   <div class="flex gap-3" style="flex-wrap:wrap;margin-top:14px">
     <?php foreach ($koraci as $k): ?>
-      <span class="badge badge--<?= $k[1]?'ok':'muted' ?>"><?= $k[1]?'✔':'○' ?> <?= e($k[0]) ?></span>
+      <span class="badge badge--<?= $k[1]?'ok':'muted' ?>"><?= $k[1]?ico('check',12):'' ?> <?= e($k[0]) ?></span>
     <?php endforeach; ?>
   </div>
 </div></div>

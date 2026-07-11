@@ -83,14 +83,14 @@ catch (Throwable $e) { $db_err = $e->getMessage(); }
 
   <div class="card"><div class="card__body">
     <div class="flash flash--<?= $db_ok?'info':'error' ?>" style="margin-bottom:20px;">
-      <?php if ($db_ok): ?>✔ Konekcija sa bazom <strong><?= e($CONFIG['db']['name']) ?></strong> uspešna.
+      <?php if ($db_ok): ?><?= ico('check',14) ?> Konekcija sa bazom <strong><?= e($CONFIG['db']['name']) ?></strong> uspešna.
       <?php else: ?>✖ Nema konekcije sa bazom: <?= e($db_err) ?>
       <?php endif; ?>
     </div>
 
     <?php if ($done): ?>
       <div class="flash flash--success"><?= e($step_msg) ?></div>
-      <div class="help mb-2">⚠️ Iz bezbednosnih razloga sada u <code>app/config.php</code> postavi <code>'allow_setup' =&gt; false</code> ili obriši <code>setup.php</code>.</div>
+      <div class="help mb-2"><?= ico('warn',14) ?> Iz bezbednosnih razloga sada u <code>app/config.php</code> postavi <code>'allow_setup' =&gt; false</code> ili obriši <code>setup.php</code>.</div>
       <a class="btn btn--primary btn--block" href="<?= url('login') ?>">Idi na prijavu →</a>
     <?php else: ?>
       <?php if ($error): ?><div class="flash flash--error"><?= e($error) ?></div><?php endif; ?>

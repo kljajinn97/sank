@@ -119,7 +119,7 @@ if ($viewId) {
       <?php if (!$zavrsen): ?>
       <div class="toolbar" style="margin-top:16px;justify-content:flex-end">
         <button class="btn btn--ghost" name="akcija" value="snimi">Sačuvaj (nastavi kasnije)</button>
-        <button class="btn btn--primary" name="akcija" value="zavrsi" onclick="return confirm('Završiti popis? Zalihe će biti usklađene sa izbrojanim stanjem.')">Završi popis i uskladi zalihe</button>
+        <button class="btn btn--primary" name="akcija" value="zavrsi" onclick="return ukConfirmSubmit(this,'Završiti popis? Zalihe će biti usklađene sa izbrojanim stanjem.',{danger:true,ok:'Obriši'})">Završi popis i uskladi zalihe</button>
       </div>
       <?php endif; ?>
     </form>
@@ -156,7 +156,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <td class="num <?= $p['razlika']<0?'out':($p['razlika']>0?'in':'muted') ?>"><?= novac($p['razlika']) ?></td>
         <td class="text-right" style="white-space:nowrap">
           <a class="btn btn--ghost btn--sm" href="<?= urlq('popis',['view'=>$p['id']]) ?>"><?= $p['status']==='zavrsen'?'Pregled':'Nastavi' ?></a>
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati popis?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $p['id'] ?>">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati popis?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $p['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
         </td>
       </tr>

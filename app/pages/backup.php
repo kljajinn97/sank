@@ -97,7 +97,7 @@ require __DIR__ . '/../partials/layout_top.php';
     <div class="card__head"><div class="card__title">Kompletna rezervna kopija</div></div>
     <div class="card__body">
       <p class="muted" style="margin-top:0">Preuzmi sve podatke svog lokala kao jedan <strong>.sql</strong> fajl. Čuvaj ga na sigurnom — služi kao rezervna kopija.</p>
-      <a class="btn btn--primary" href="<?= url('backup') ?>?dump=sql">⬇ Preuzmi SQL backup</a>
+      <a class="btn btn--primary" href="<?= url('backup') ?>?dump=sql"><?= ico('download',16) ?> Preuzmi SQL backup</a>
       <div class="help" style="margin-top:12px">Savet: pravi kopiju povremeno (npr. jednom nedeljno) i pre većih izmena.</div>
     </div>
   </div>
@@ -111,7 +111,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <tr>
           <td><strong><?= e($naz) ?></strong></td>
           <td class="num"><?= $brojevi[$t] ?></td>
-          <td class="text-right"><a class="btn btn--ghost btn--sm" href="<?= url('backup') ?>?dump=csv&t=<?= $t ?>">⬇ CSV</a></td>
+          <td class="text-right"><a class="btn btn--ghost btn--sm" href="<?= url('backup') ?>?dump=csv&t=<?= $t ?>"><?= ico('download',15) ?> CSV</a></td>
         </tr>
       <?php endforeach; ?>
       </tbody>

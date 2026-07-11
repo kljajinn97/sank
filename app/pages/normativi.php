@@ -112,7 +112,7 @@ require __DIR__ . '/../partials/layout_top.php';
             "id"=>$n["id"],"artikal_id"=>$n["artikal_id"],"napomena"=>$n["napomena"],
             "stavke"=>$stavkeMap[$n["id"]] ?? []
           ], JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>Izmeni</button>
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati normativ?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $n['id'] ?>">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati normativ?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $n['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
         </td>
       </tr>

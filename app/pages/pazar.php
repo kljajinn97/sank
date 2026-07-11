@@ -81,7 +81,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <td class="num in"><?= novac($p['iznos']) ?></td>
         <?php if ($mozeBrisati): ?>
         <td class="text-right">
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati ovaj unos?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $p['id'] ?>">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati ovaj unos?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $p['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
         </td>
         <?php endif; ?>

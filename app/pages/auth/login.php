@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="auth__main">
     <form class="auth__form" method="post" action="<?= url('login') ?>">
       <?= csrf_field() ?>
-      <h2>Dobrodošli nazad 👋</h2>
+      <h2>Dobrodošli nazad</h2>
       <p class="muted">Prijavi se na svoj nalog.</p>
 
       <?php if ($error): ?>

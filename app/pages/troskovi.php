@@ -134,7 +134,7 @@ require __DIR__ . '/../partials/layout_top.php';
               <button class="btn btn--ghost btn--sm">Poništi</button></form>
           <?php endif; ?>
           <button class="btn btn--ghost btn--sm" onclick='openTrosak(<?= json_encode($t, JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>Izmeni</button>
-          <form method="post" style="display:inline" onsubmit="return confirm('Obrisati trošak?')"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $t['id'] ?>">
+          <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati trošak?',{danger:true,ok:'Obriši'})"><?= csrf_field() ?><input type="hidden" name="akcija" value="obrisi"><input type="hidden" name="id" value="<?= $t['id'] ?>">
             <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
         </td>
         <?php endif; ?>

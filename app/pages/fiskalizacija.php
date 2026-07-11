@@ -24,7 +24,7 @@ require __DIR__ . '/../partials/layout_top.php';
 
 <div class="card mb-2" style="border-color:var(--warn);background:linear-gradient(120deg,var(--warn-soft),var(--surface))">
   <div class="card__body">
-    <strong>⚠️ Važno — pravni okvir</strong>
+    <strong><?= ico('warn',16) ?> Važno — pravni okvir</strong>
     <p class="muted" style="margin:8px 0 0;font-size:.9rem;line-height:1.6">
       Za legalno izdavanje fiskalnih računa u Srbiji potrebni su: <strong>odobren ESIR</strong> (Poreska uprava),
       <strong>PFR</strong> (L-PFR uređaj ili V-PFR servis) i <strong>bezbednosni element</strong>.

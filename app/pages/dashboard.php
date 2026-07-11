@@ -50,7 +50,7 @@ if (is_super_admin()):
     $noviLokali = db()->query('SELECT * FROM lokali ORDER BY created_at DESC LIMIT 6')->fetchAll();
 ?>
   <div class="page-head">
-    <div><h1>Zdravo, <?= e($u['ime']) ?> 👋</h1><p>Pregled celog sistema — svi lokali i nalozi.</p></div>
+    <div><h1>Zdravo, <?= e($u['ime']) ?></h1><p>Pregled celog sistema — svi lokali i nalozi.</p></div>
     <a class="btn btn--primary" href="<?= url('admin/lokali') ?>">+ Novi lokal</a>
   </div>
   <div class="stats mb-2">
@@ -142,9 +142,9 @@ if (is_super_admin()):
     };
 ?>
   <div class="page-head">
-    <div><h1>Zdravo, <?= e($u['ime']) ?> 👋</h1><p><?= e($u['lokal_naziv']) ?> — evo kako stoje stvari danas.</p></div>
+    <div><h1>Zdravo, <?= e($u['ime']) ?></h1><p><?= e($u['lokal_naziv']) ?> — evo kako stoje stvari danas.</p></div>
     <div class="flex gap-2">
-      <button class="btn btn--ghost" onclick="mWidgets.showModal()">⚙ Prilagodi</button>
+      <button class="btn btn--ghost" onclick="mWidgets.showModal()"><?= ico('settings',16) ?> Prilagodi</button>
       <a class="btn btn--primary" href="<?= url('pazar') ?>">+ Unesi pazar</a>
     </div>
   </div>
@@ -154,7 +154,7 @@ if (is_super_admin()):
     if ($brArtUk === 0 && user_has_role(['vlasnik','menadzer'])): ?>
     <div class="card mb-2" style="border:1px solid var(--brand);background:linear-gradient(120deg,var(--brand-soft),var(--surface))">
       <div class="card__body flex items-center justify-between" style="gap:16px;flex-wrap:wrap">
-        <div><strong style="font-size:1.05rem">👋 Dobrodošao! Podesimo tvoj lokal.</strong>
+        <div><strong style="font-size:1.05rem">Dobrodošao! Podesimo tvoj lokal.</strong>
           <div class="muted" style="font-size:.9rem">Dodaj kategorije, artikle i boju brenda za par minuta.</div></div>
         <a class="btn btn--primary" href="<?= url('onboarding') ?>">Pokreni brzo podešavanje →</a>
       </div>

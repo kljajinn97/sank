@@ -125,7 +125,7 @@ require __DIR__ . '/../partials/layout_top.php';
             <td><strong><?= e($k['naziv']) ?></strong></td>
             <td class="num"><?= (int)$k['br'] ?></td>
             <td class="text-right">
-              <form method="post" style="display:inline" onsubmit="return confirm('Obrisati kategoriju? Artikli ostaju bez kategorije.')">
+              <form method="post" style="display:inline" onsubmit="return ukConfirmSubmit(this,'Obrisati kategoriju? Artikli ostaju bez kategorije.',{danger:true,ok:'Obriši'})">
                 <?= csrf_field() ?><input type="hidden" name="akcija" value="kat_obrisi"><input type="hidden" name="id" value="<?= $k['id'] ?>">
                 <button class="btn btn--ghost btn--sm" style="color:var(--danger)">×</button></form>
             </td>
