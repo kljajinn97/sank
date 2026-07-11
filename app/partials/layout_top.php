@@ -19,6 +19,7 @@ function nav_icon(string $k): string {
       'pazar'     => '<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
       'pos'       => '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/>',
       'uredjaji'  => '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
+      'qrmeni'    => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20h.01M17 20h.01M20 17h.01"/>',
       'backup'    => '<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7M7 10l5 5 5-5M12 15V3"/>',
       'fiskalizacija' => '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h5"/>',
       'fakture'   => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
@@ -94,6 +95,7 @@ function nav_item(string $key, string $label, string $route, string $active): vo
           nav_item('fakture','Fakture (prijem robe)','fakture',$active);
           if ($sef) nav_item('narudzbenice','Narudžbenice','narudzbenice',$active);
           nav_item('troskovi','Troškovi i računi','troskovi',$active);
+          if ($sef) nav_item('qrmeni','QR meni','qrmeni',$active);
         ?>
 
         <div class="nav__label">Roba</div>

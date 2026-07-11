@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $mozeMenjati) {
     if ($akcija === 'sacuvaj') {
         $id      = (int)($_POST['id'] ?? 0);
         $naziv   = post('naziv');
+        $opis    = post('opis') ?: null;
         $jm      = post('jedinica_mere') ?: 'kom';
         $nab     = to_num($_POST['nabavna_cena'] ?? 0);
         $pro     = to_num($_POST['prodajna_cena'] ?? 0);
@@ -30,12 +31,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $mozeMenjati) {
 
         if ($id > 0) {
             $staraCena = (float)db_val('SELECT prodajna_cena FROM artikli WHERE id=? AND lokal_id=?', [$id,$lid]);
-            db_run('UPDATE artikli SET naziv=?, jedinica_mere=?, nabavna_cena=?, prodajna_cena=?, min_zaliha=?, kategorija_id=?, boja=?, poreska_oznaka=?
-                    WHERE id=? AND lokal_id=?', [$naziv,$jm,$nab,$pro,$min,$katId,$boja,$oznaka,$id,$lid]);
+            db_run('UPDATE artikli SET naziv=?, opis=?, jedinica_mere=?, nabavna_cena=?, prodajna_cena=?, min_zaliha=?, kategorija_id=?, boja=?, poreska_oznaka=?
+                    WHERE id=? AND lokal_id=?', [$naziv,$opis,$jm,$nab,$pro,$min,$katId,$boja,$oznaka,$id,$lid]);
             if ($staraCena != $pro) audit('izmena_cene','artikal',$id, novac($staraCena).' → '.novac($pro).' · '.$naziv);
         } else {
-            db_run('INSERT INTO artikli (lokal_id,kategorija_id,naziv,jedinica_mere,nabavna_cena,prodajna_cena,min_zaliha,boja,poreska_oznaka)
-                    VALUES (?,?,?,?,?,?,?,?,?)', [$lid,$katId,$naziv,$jm,$nab,$pro,$min,$boja,$oznaka]);
+            db_run('INSERT INTO artikli (lokal_id,kategorija_id,naziv,opis,jedinica_mere,nabavna_cena,prodajna_cena,min_zaliha,boja,poreska_oznaka)
+                    VALUES (?,?,?,?,?,?,?,?,?,?)', [$lid,$katId,$naziv,$opis,$jm,$nab,$pro,$min,$boja,$oznaka]);
             $id = (int)db()->lastInsertId();
         }
 
@@ -118,7 +119,7 @@ require __DIR__ . '/../partials/layout_top.php';
       $style = $a['slika'] ? "background-image:url('".e($a['slika'])."')" : "background:linear-gradient(135deg,".tile_boja($a).",".tile_boja($a)."cc)";
     ?>
       <div class="ptile" <?= $mozeMenjati ? 'onclick=\'openArtikal('.json_encode([
-          "id"=>$a["id"],"naziv"=>$a["naziv"],"jedinica_mere"=>$a["jedinica_mere"],
+          "id"=>$a["id"],"naziv"=>$a["naziv"],"opis"=>$a["opis"],"jedinica_mere"=>$a["jedinica_mere"],
           "nabavna_cena"=>$a["nabavna_cena"],"prodajna_cena"=>$a["prodajna_cena"],
           "min_zaliha"=>$a["min_zaliha"],"kategorija_id"=>$a["kategorija_id"],"boja"=>$a["boja"],"poreska_oznaka"=>$a["poreska_oznaka"]
         ], JSON_HEX_APOS|JSON_HEX_QUOT).')\'' : '' ?>>
@@ -156,7 +157,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <?php if ($mozeMenjati): ?>
         <td class="text-right" style="white-space:nowrap">
           <button class="btn btn--ghost btn--sm" onclick='openArtikal(<?= json_encode([
-              "id"=>$a["id"],"naziv"=>$a["naziv"],"jedinica_mere"=>$a["jedinica_mere"],
+              "id"=>$a["id"],"naziv"=>$a["naziv"],"opis"=>$a["opis"],"jedinica_mere"=>$a["jedinica_mere"],
               "nabavna_cena"=>$a["nabavna_cena"],"prodajna_cena"=>$a["prodajna_cena"],
               "min_zaliha"=>$a["min_zaliha"],"kategorija_id"=>$a["kategorija_id"],"boja"=>$a["boja"],"poreska_oznaka"=>$a["poreska_oznaka"]
           ], JSON_HEX_APOS|JSON_HEX_QUOT) ?>)'>Izmeni</button>
@@ -178,6 +179,7 @@ require __DIR__ . '/../partials/layout_top.php';
       <button type="button" class="btn btn--ghost btn--sm" onclick="mArtikal.close()">✕</button></div>
     <div class="card__body">
       <div class="field"><label class="label">Naziv artikla *</label><input class="input" name="naziv" id="a_naziv" required placeholder="npr. Coca-Cola 0.33"></div>
+      <div class="field"><label class="label">Opis (za QR meni)</label><input class="input" name="opis" id="a_opis" placeholder="npr. gazirani sok 0.33l"></div>
       <div class="form-row">
         <div class="field"><label class="label">Kategorija</label>
           <select class="select" name="kategorija_id" id="a_kat"><option value="0">— bez kategorije —</option>
@@ -222,7 +224,7 @@ require __DIR__ . '/../partials/layout_top.php';
 function openArtikal(a){
   a=a||{};
   a_id.value=a.id||0; a_title.textContent=a.id?'Izmena artikla':'Novi artikal';
-  a_naziv.value=a.naziv||''; a_jm.value=a.jedinica_mere||'kom';
+  a_naziv.value=a.naziv||''; a_opis.value=a.opis||''; a_jm.value=a.jedinica_mere||'kom';
   a_nab.value=a.nabavna_cena||0; a_pro.value=a.prodajna_cena||0; a_min.value=a.min_zaliha||0;
   a_kat.value=a.kategorija_id||0; a_boja.value=a.boja||'#0d9488';
   document.getElementById('a_oznaka').value=a.poreska_oznaka||'Ђ';

@@ -22,9 +22,13 @@ $routes = [
     'admin/lokali'   => 'admin/lokali.php',
     'admin/korisnici'=> 'admin/korisnici.php',
 
+    // Javno (bez prijave)
+    'meni'       => 'meni.php',
+
     // POS terminal (odvojena aplikacija)
     'kasa'       => 'kasa.php',
     'uredjaji'   => 'uredjaji.php',
+    'qrmeni'     => 'qrmeni.php',
 
     // Lokal
     'pos'        => 'pos.php',

@@ -704,6 +704,30 @@ h3 { font-size: 1.05rem; }
 .uk-check.is-fail svg { width: 44px; height: 44px; }
 @keyframes ukDraw { to { stroke-dashoffset: 0; } }
 
+/* ---------------- Javni QR meni ---------------- */
+.meni { max-width: 640px; margin: 0 auto; padding-bottom: 40px; }
+.meni__head {
+  display: flex; align-items: center; gap: 14px; padding: 28px 20px 22px;
+  background: linear-gradient(140deg, var(--brand-700), var(--brand) 70%, var(--accent) 160%); color: #fff;
+  border-radius: 0 0 26px 26px; box-shadow: 0 12px 30px -16px color-mix(in srgb, var(--brand) 70%, transparent);
+}
+.meni__logo { width: 56px; height: 56px; border-radius: 15px; object-fit: cover; background: #fff; flex-shrink: 0; }
+.meni__logo--txt { display: grid; place-items: center; font-weight: 800; font-size: 26px; background: rgba(255,255,255,.18); }
+.meni__title { color: #fff; font-size: 1.5rem; margin: 0; }
+.meni__sub { color: rgba(255,255,255,.85); font-size: .85rem; }
+.meni__sec { padding: 8px 16px; }
+.meni__cat { font-size: 1.05rem; color: var(--brand-700); margin: 18px 4px 8px; padding-bottom: 6px; border-bottom: 2px solid var(--brand-soft); }
+:root[data-theme="dark"] .meni__cat { color: color-mix(in srgb, var(--brand), #fff 35%); }
+.meni__item { display: flex; align-items: center; gap: 14px; padding: 12px 6px; border-bottom: 1px solid var(--border); }
+.meni__img { width: 60px; height: 60px; border-radius: 14px; background-size: cover; background-position: center; flex-shrink: 0; box-shadow: var(--shadow-sm); }
+.meni__img--c { opacity: .9; }
+.meni__info { flex: 1; min-width: 0; }
+.meni__name { font-weight: 700; font-size: 1rem; }
+.meni__desc { color: var(--text-2); font-size: .84rem; margin-top: 2px; }
+.meni__price { font-weight: 800; color: var(--brand-700); font-size: 1.05rem; white-space: nowrap; }
+:root[data-theme="dark"] .meni__price { color: color-mix(in srgb, var(--brand), #fff 30%); }
+.meni__foot { text-align: center; color: var(--text-3); font-size: .8rem; padding: 26px 16px 10px; }
+
 /* ---------------- Print / PDF ---------------- */
 @media print {
   .sidebar, .topbar, .no-print, button, .btn { display: none !important; }
