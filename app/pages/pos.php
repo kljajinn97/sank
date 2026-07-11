@@ -54,12 +54,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($akcija === 'add_sto' && $sef) {
         $naziv = post('naziv'); if ($naziv==='') $naziv='Sto';
-        db_run('INSERT INTO stolovi (lokal_id,naziv,zona) VALUES (?,?,?)', [$lid,$naziv,post('zona')?:null]);
+        $oblik = ($_POST['oblik'] ?? '')==='kvadrat' ? 'kvadrat' : 'krug';
+        db_run('INSERT INTO stolovi (lokal_id,naziv,zona,oblik) VALUES (?,?,?,?)', [$lid,$naziv,post('zona')?:null,$oblik]);
         flash('success','Sto je dodat.'); redirect(url('pos'));
     }
     if ($akcija === 'del_sto' && $sef) {
         db_run('DELETE FROM stolovi WHERE id=? AND lokal_id=?', [(int)$_POST['id'],$lid]);
         flash('success','Sto je obrisan.'); redirect(url('pos'));
+    }
+    if ($akcija === 'pozicija' && $sef) {
+        $sid = (int)($_POST['id'] ?? 0);
+        $x = max(2, min(98, (float)($_POST['x'] ?? 0)));
+        $y = max(2, min(98, (float)($_POST['y'] ?? 0)));
+        db_run('UPDATE stolovi SET pos_x=?, pos_y=? WHERE id=? AND lokal_id=?', [$x,$y,$sid,$lid]);
+        if (!empty($_POST['ajax'])) { echo 'ok'; exit; }
+        redirect(url('pos'));
     }
 
     if ($akcija === 'open') {
@@ -651,27 +660,68 @@ require $SHELL_TOP;
 </div>
 <?php endif; ?>
 
+<?php
+  // zone za filter + default pozicije za stolove na 0,0
+  $zone = [];
+  foreach ($stolovi as $s) { $z = trim((string)($s['zona'] ?? '')); if ($z!=='' && !in_array($z,$zone,true)) $zone[] = $z; }
+  $defIdx = 0;
+?>
 <div class="card">
-  <div class="card__head"><div class="card__title">Stolovi</div>
-    <?php if ($sef): ?><button class="btn btn--ghost btn--sm" onclick="mSto.showModal()"><?= ico('plus',16) ?> Dodaj sto</button><?php endif; ?></div>
+  <div class="card__head">
+    <div class="card__title"><?= ico('tables',18) ?> Mapa lokala</div>
+    <div class="flex gap-2 items-center" style="flex-wrap:wrap">
+      <?php if ($zone): ?>
+      <div class="tabs" id="zoneTabs">
+        <a href="#" class="is-active" data-zona="" onclick="filterZona('',this);return false">Sve</a>
+        <?php foreach ($zone as $z): ?><a href="#" data-zona="<?= e($z) ?>" onclick="filterZona('<?= e($z) ?>',this);return false"><?= e($z) ?></a><?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+      <?php if ($sef): ?>
+        <button class="btn btn--ghost btn--sm" id="editBtn" onclick="toggleEdit()"><?= ico('move',15) ?> Rasporedi</button>
+        <button class="btn btn--ghost btn--sm" onclick="mSto.showModal()"><?= ico('plus',16) ?> Dodaj sto</button>
+      <?php endif; ?>
+    </div>
+  </div>
   <div class="card__body">
     <?php if (!$stolovi): ?>
-      <div class="empty">Još nema stolova. <?= $sef?'Dodaj prvi sto ili koristi „šank" za brzu prodaju.':'' ?></div>
+      <div class="empty">Nema stolova. <?= $sef?'Dodaj sto pa ga rasporedi po tlocrtu (ili koristi „Brzi račun" za šank).':'' ?></div>
     <?php else: ?>
-      <div class="stolovi-grid">
-        <?php foreach ($stolovi as $s): $zauzet = !empty($s['racun_id']); ?>
-          <form method="post" style="margin:0"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" value="<?= $s['id'] ?>">
-            <button class="sto-card <?= $zauzet?'is-busy':'' ?>" type="submit">
-              <span class="sto-card__name"><?= e($s['naziv']) ?></span>
-              <span class="sto-card__status"><?= $zauzet ? novac($s['racun_ukupno']) : 'slobodan' ?></span>
-              <?php if($sef): ?><span class="sto-card__del" onclick="event.stopPropagation();delSto(event,<?= $s['id'] ?>)">×</span><?php endif; ?>
-            </button>
-          </form>
+      <div class="floor" id="floor">
+        <?php foreach ($stolovi as $s):
+          $zauzet = !empty($s['racun_id']);
+          $x=(float)$s['pos_x']; $y=(float)$s['pos_y'];
+          if ($x==0 && $y==0) { $col=$defIdx%6; $row=intdiv($defIdx,6); $x=10+$col*15; $y=15+$row*24; $defIdx++; }
+        ?>
+          <div class="floor-table <?= $zauzet?'is-busy':'' ?> <?= $s['oblik']==='kvadrat'?'is-square':'' ?>"
+               data-id="<?= $s['id'] ?>" data-zona="<?= e($s['zona']) ?>"
+               style="left:<?= $x ?>%;top:<?= $y ?>%" onclick="stoClick(<?= $s['id'] ?>)">
+            <?php if($sef): ?><span class="floor-table__del" onclick="event.stopPropagation();delSto(event,<?= $s['id'] ?>)"><?= ico('x',13) ?></span><?php endif; ?>
+            <span class="floor-table__name"><?= e($s['naziv']) ?></span>
+            <span class="floor-table__st"><?= $zauzet?novac($s['racun_ukupno']):'slobodan' ?></span>
+          </div>
         <?php endforeach; ?>
       </div>
+      <?php if ($sef): ?><div class="help no-print" id="editHint" style="display:none;margin-top:10px">Prevuci stolove da ih rasporediš po sali. Klikni „Rasporedi" ponovo da završiš (čuva se automatski).</div><?php endif; ?>
     <?php endif; ?>
   </div>
 </div>
+<form id="openStoForm" method="post" style="display:none" onsubmit="SankUI.loading('Otvaram…')"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" id="openStoId"></form>
+<script>
+var CSRF_TOKEN=<?= json_encode(csrf_token()) ?>, EDIT=false;
+function stoClick(id){ if(EDIT)return; document.getElementById('openStoId').value=id; document.getElementById('openStoForm').submit(); }
+function filterZona(z,el){ document.querySelectorAll('#zoneTabs a').forEach(function(a){a.classList.remove('is-active');}); el.classList.add('is-active');
+  document.querySelectorAll('#floor .floor-table').forEach(function(t){ t.style.display=(!z||t.dataset.zona===z)?'':'none'; }); }
+function toggleEdit(){ EDIT=!EDIT; var f=document.getElementById('floor'); if(f)f.classList.toggle('is-edit',EDIT);
+  var h=document.getElementById('editHint'); if(h)h.style.display=EDIT?'block':'none';
+  document.getElementById('editBtn').classList.toggle('btn--primary',EDIT);
+  if(!EDIT)SankUI.toast('Raspored sačuvan','success'); }
+(function(){ var floor=document.getElementById('floor'); if(!floor)return; var drag=null;
+  floor.addEventListener('pointerdown',function(e){ if(!EDIT)return; var t=e.target.closest('.floor-table'); if(!t)return; drag=t; try{t.setPointerCapture(e.pointerId);}catch(x){} t.classList.add('dragging'); e.preventDefault(); });
+  floor.addEventListener('pointermove',function(e){ if(!drag)return; var r=floor.getBoundingClientRect(); var x=(e.clientX-r.left)/r.width*100, y=(e.clientY-r.top)/r.height*100; x=Math.max(4,Math.min(96,x)); y=Math.max(7,Math.min(93,y)); drag.style.left=x+'%'; drag.style.top=y+'%'; });
+  floor.addEventListener('pointerup',function(e){ if(!drag)return; var t=drag; drag=null; t.classList.remove('dragging'); var x=parseFloat(t.style.left), y=parseFloat(t.style.top);
+    fetch('<?= url('pos') ?>',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({akcija:'pozicija',ajax:1,id:t.dataset.id,x:x.toFixed(2),y:y.toFixed(2),_csrf:CSRF_TOKEN})}); });
+})();
+</script>
 
 <?php if ($sef): ?>
 <dialog id="mSto" class="modal">
@@ -680,8 +730,11 @@ require $SHELL_TOP;
     <div class="card__body">
       <div class="form-row">
         <div class="field"><label class="label">Naziv / broj *</label><input class="input" name="naziv" required placeholder="npr. Sto 1"></div>
-        <div class="field"><label class="label">Zona</label><input class="input" name="zona" placeholder="bašta, sala…"></div>
+        <div class="field"><label class="label">Zona</label><input class="input" name="zona" placeholder="bašta, sala, sprat…"></div>
       </div>
+      <div class="field"><label class="label">Oblik</label>
+        <select class="select" name="oblik"><option value="krug">Okrugli</option><option value="kvadrat">Kvadratni</option></select>
+        <div class="help">Sto ćeš rasporediti prevlačenjem na mapi.</div></div>
     </div>
     <div class="modal__foot"><button type="button" class="btn btn--ghost" onclick="mSto.close()">Otkaži</button><button class="btn btn--primary">Dodaj</button></div>
   </form>
