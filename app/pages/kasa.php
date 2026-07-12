@@ -61,48 +61,61 @@ if ($device && pos_current_user()) redirect(url('pos'));
 $kasa_title = 'Prijava';
 require __DIR__ . '/../partials/kasa_top.php';
 ?>
-<div class="kasa-center">
-  <div class="kasa-box">
-    <?php if (!$device): ?>
-      <!-- AKTIVACIJA -->
-      <div class="sidebar__logo" style="width:64px;height:64px;font-size:30px;margin:0 auto 18px">S</div>
-      <h2>Aktivacija POS uređaja</h2>
-      <p class="muted" style="margin-bottom:24px">Unesi aktivacioni kod koji si dobio od administratora. Uređaj se vezuje za tvoj lokal.</p>
-      <form method="post" action="<?= url('kasa') ?>">
-        <?= csrf_field() ?><input type="hidden" name="akcija" value="activate">
-        <input class="input" name="kod" placeholder="npr. SANK-4F2A-9C1B" required autofocus
-               style="text-align:center;font-size:1.2rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">
-        <button class="btn btn--primary btn--block">Aktiviraj uređaj</button>
-      </form>
-
-    <?php else: ?>
-      <!-- PIN LOCK -->
-      <div class="sidebar__logo" style="width:56px;height:56px;margin:0 auto 14px"><?= ico('lock',26) ?></div>
-      <h2>Unesi PIN</h2>
-      <p class="muted">Prijavi se svojim PIN-om da počneš rad.</p>
-      <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
-      <form method="post" action="<?= url('kasa') ?>" id="pinForm">
-        <?= csrf_field() ?><input type="hidden" name="akcija" value="pin"><input type="hidden" name="pin" id="pinVal">
-      </form>
-      <div class="pinpad">
-        <?php foreach ([1,2,3,4,5,6,7,8,9] as $n): ?><button onclick="pinPush('<?= $n ?>')"><?= $n ?></button><?php endforeach; ?>
-        <button class="wide" onclick="pinClear()">C</button>
-        <button onclick="pinPush('0')">0</button>
-        <button class="wide" onclick="pinBack()">⌫</button>
+<?php $lok = $device ? db_row('SELECT naziv,logo FROM lokali WHERE id=?', [$device['lokal_id']]) : null; ?>
+<?php if (!$device): ?>
+  <div class="kasa-center"><div class="kasa-box">
+    <div class="sidebar__logo" style="width:64px;height:64px;font-size:30px;margin:0 auto 18px">S</div>
+    <h2>Aktivacija POS uređaja</h2>
+    <p class="muted" style="margin-bottom:24px">Unesi aktivacioni kod koji si dobio od administratora. Uređaj se vezuje za tvoj lokal.</p>
+    <form method="post" action="<?= url('kasa') ?>">
+      <?= csrf_field() ?><input type="hidden" name="akcija" value="activate">
+      <input class="input" name="kod" placeholder="npr. SANK-4F2A-9C1B" required autofocus
+             style="text-align:center;font-size:1.2rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">
+      <button class="btn btn--primary btn--block">Aktiviraj uređaj</button>
+    </form>
+  </div></div>
+<?php else: ?>
+  <div class="pin-screen">
+    <div class="pin-hero">
+      <div class="pin-hero__top">
+        <?php if(!empty($lok['logo'])): ?><img class="pin-hero__logo" src="<?= e($lok['logo']) ?>" alt="">
+        <?php else: ?><div class="pin-hero__logo"><?= e(mb_strtoupper(mb_substr($lok['naziv'] ?? 'S',0,1))) ?></div><?php endif; ?>
+        <div class="pin-hero__name"><?= e($lok['naziv'] ?? 'Sank POS') ?></div>
       </div>
-    <?php endif; ?>
+      <div class="pin-hero__mid">
+        <div class="pin-clock" id="clock">--:--</div>
+        <div class="pin-date" id="cdate"></div>
+      </div>
+      <div class="pin-hero__foot">Sank POS terminal · dobrodošli</div>
+    </div>
+    <div class="pin-side">
+      <div class="pin-side__box">
+        <div class="sidebar__logo" style="width:52px;height:52px;margin:0 auto 12px"><?= ico('lock',24) ?></div>
+        <h2>Unesi PIN</h2>
+        <p class="muted">Prijavi se svojim PIN-om.</p>
+        <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+        <form method="post" action="<?= url('kasa') ?>" id="pinForm"><?= csrf_field() ?><input type="hidden" name="akcija" value="pin"><input type="hidden" name="pin" id="pinVal"></form>
+        <div class="pinpad">
+          <?php foreach ([1,2,3,4,5,6,7,8,9] as $n): ?><button onclick="pinPush('<?= $n ?>')"><?= $n ?></button><?php endforeach; ?>
+          <button class="wide" onclick="pinClear()">C</button>
+          <button onclick="pinPush('0')">0</button>
+          <button class="wide" onclick="pinBack()">⌫</button>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+<?php endif; ?>
 
 <script>
-// PIN je 4-cifreni; auto-potvrda kad se unese 4. cifra.
-let PIN='';
-function paint(){document.querySelectorAll('#pinDots i').forEach((d,i)=>d.classList.toggle('on',i<PIN.length));}
-function submitPin(){document.getElementById('pinVal').value=PIN;document.getElementById('pinForm').submit();}
-function pinPush(n){ if(PIN.length>=4)return; PIN+=n; paint(); if(PIN.length===4) setTimeout(submitPin,140); }
-function pinBack(){ PIN=PIN.slice(0,-1); paint(); }
-function pinClear(){ PIN=''; paint(); }
-document.addEventListener('keydown',e=>{ if(e.key>='0'&&e.key<='9')pinPush(e.key); else if(e.key==='Backspace')pinBack(); });
+if(document.getElementById('pinForm')){
+  var PIN='';
+  var paint=function(){document.querySelectorAll('#pinDots i').forEach(function(d,i){d.classList.toggle('on',i<PIN.length);});};
+  var submitPin=function(){document.getElementById('pinVal').value=PIN;document.getElementById('pinForm').submit();};
+  window.pinPush=function(n){ if(PIN.length>=4)return; PIN+=n; paint(); if(PIN.length===4) setTimeout(submitPin,140); };
+  window.pinBack=function(){ PIN=PIN.slice(0,-1); paint(); };
+  window.pinClear=function(){ PIN=''; paint(); };
+  document.addEventListener('keydown',function(e){ if(e.key>='0'&&e.key<='9')pinPush(e.key); else if(e.key==='Backspace')pinBack(); });
+}
 </script>
 
 <?php require __DIR__ . '/../partials/kasa_bottom.php'; ?>

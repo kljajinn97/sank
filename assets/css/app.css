@@ -651,6 +651,36 @@ h3 { font-size: 1.05rem; }
 }
 .pinpad button:active { transform: scale(.92); background: var(--brand-soft); color: var(--brand-700); box-shadow: 0 4px 10px -6px color-mix(in srgb, var(--brand) 60%, transparent); }
 
+/* PIN ekran — levo hero + sat, desno pinpad */
+.pin-screen {
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 0;
+  min-height: calc(100vh - 100px); margin: -20px; border-radius: 0;
+  overflow: hidden;
+}
+.pin-hero {
+  background: linear-gradient(150deg, var(--brand-700), var(--brand) 55%, var(--accent) 165%);
+  color: #fff; display: flex; flex-direction: column; justify-content: space-between;
+  padding: 50px 46px; position: relative; overflow: hidden;
+}
+.pin-hero::after { content:''; position:absolute; right:-140px; bottom:-140px; width:420px; height:420px; border-radius:50%; background:rgba(255,255,255,.08); }
+.pin-hero::before { content:''; position:absolute; left:-90px; top:-90px; width:260px; height:260px; border-radius:50%; background:rgba(255,255,255,.06); }
+.pin-hero__top { display:flex; align-items:center; gap:14px; position:relative; z-index:1; }
+.pin-hero__logo { width:56px; height:56px; border-radius:15px; object-fit:cover; background:rgba(255,255,255,.2); display:grid; place-items:center; font-weight:800; font-size:26px; }
+.pin-hero__name { font-size:1.5rem; font-weight:800; }
+.pin-hero__mid { position:relative; z-index:1; }
+.pin-clock { font-size:5rem; font-weight:900; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+.pin-date { font-size:1.15rem; opacity:.9; margin-top:8px; text-transform:capitalize; }
+.pin-hero__foot { position:relative; z-index:1; opacity:.7; font-size:.85rem; }
+.pin-side { display:grid; place-items:center; padding:40px 30px; background:var(--surface); }
+.pin-side__box { width:100%; max-width:300px; text-align:center; }
+.kasa-clock { font-weight:700; font-variant-numeric:tabular-nums; color:var(--text-2); font-size:.95rem; }
+
+@media (max-width: 820px) {
+  .pin-screen { grid-template-columns: 1fr; min-height:auto; }
+  .pin-hero { padding: 28px; }
+  .pin-clock { font-size: 3.4rem; }
+}
+
 /* ============================================================
    SANK UI KIT — toast, dijalozi, loading/odobreno
    ============================================================ */

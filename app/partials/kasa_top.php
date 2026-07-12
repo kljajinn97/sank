@@ -31,6 +31,7 @@ $kasa_title = $kasa_title ?? 'POS';
       <div style="font-size:.72rem;color:var(--text-3)">POS terminal</div></div>
   </div>
   <div class="kasa-top__right">
+    <span class="kasa-clock" id="topClock">--:--</span>
     <?php if ($pu): ?>
       <a class="badge badge--teal" href="<?= url('kasa') ?>?lock=1" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px" title="Promeni radnika"><?= ico('user',13) ?> <?= e(trim($pu['ime'].' '.($pu['prezime']??''))) ?></a>
       <a class="btn btn--ghost btn--sm" href="<?= url('kasa') ?>?lock=1"><?= ico('lock',16) ?> Zaključaj</a>
@@ -41,6 +42,19 @@ $kasa_title = $kasa_title ?? 'POS';
     </button>
   </div>
 </header>
+<script>
+(function(){
+  var dani=['Nedelja','Ponedeljak','Utorak','Sreda','Četvrtak','Petak','Subota'];
+  function p(n){return String(n).padStart(2,'0');}
+  function tick(){
+    var d=new Date(), t=p(d.getHours())+':'+p(d.getMinutes());
+    var tc=document.getElementById('topClock'); if(tc) tc.textContent=t;
+    var c=document.getElementById('clock'); if(c) c.textContent=t;
+    var cd=document.getElementById('cdate'); if(cd) cd.textContent=dani[d.getDay()]+', '+p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+'.';
+  }
+  tick(); setInterval(tick,1000);
+})();
+</script>
 <main class="kasa-main">
 <?php $flashes = flash_take(); if ($flashes): ?>
 <script>document.addEventListener('DOMContentLoaded',function(){<?php foreach ($flashes as $f): ?>SankUI.toast(<?= json_encode($f['msg']) ?>,<?= json_encode($f['type']==='error'?'error':'success') ?>);<?php endforeach; ?>});</script>
