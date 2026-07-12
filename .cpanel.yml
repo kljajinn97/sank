@@ -7,3 +7,5 @@ deployment:
     - /bin/cp -R ./* "$DEPLOYPATH"
     - /bin/cp ./.htaccess "$DEPLOYPATH"
     - /bin/rm -f "$DEPLOYPATH/router.dev.php" "$DEPLOYPATH/.cpanel.yml" "$DEPLOYPATH/.gitattributes" "$DEPLOYPATH/.gitignore"
+    # Automatske migracije baze (best-effort; ako ne uspe, pokreni ručno /migrate.php)
+    - cd "$DEPLOYPATH" && { command -v php >/dev/null 2>&1 && php migrate_cli.php || /usr/local/bin/php migrate_cli.php; } 2>&1 || true
