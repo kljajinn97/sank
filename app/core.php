@@ -287,6 +287,19 @@ function pos_terminal_active(): bool
         && (int)($_SESSION['pos_lokal'] ?? 0) === (int)(pos_current_device()['lokal_id'] ?? -1);
 }
 
+/** Happy hour popust (%) ako je trenutno unutar prozora, inače 0 */
+function happy_hour_popust(?array $lokal): float
+{
+    if (!$lokal || empty($lokal['hh_aktivan']) || (float)($lokal['hh_popust'] ?? 0) <= 0) return 0;
+    if (empty($lokal['hh_od']) || empty($lokal['hh_do'])) return 0;
+    // dani: "1,2,..7" (1=pon..7=ned, ISO). Prazno = svi dani.
+    $dani = array_filter(array_map('intval', explode(',', (string)($lokal['hh_dani'] ?? ''))));
+    if ($dani && !in_array((int)date('N'), $dani, true)) return 0;
+    $now = date('H:i:s'); $od = $lokal['hh_od']; $do = $lokal['hh_do'];
+    $u = ($od <= $do) ? ($now >= $od && $now <= $do) : ($now >= $od || $now <= $do);
+    return $u ? (float)$lokal['hh_popust'] : 0;
+}
+
 // Fiskalni sloj (ESIR integracija)
 require_once __DIR__ . '/fiskal.php';
 

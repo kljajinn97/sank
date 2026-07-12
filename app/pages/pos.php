@@ -77,7 +77,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $rid = 0;
         if ($stoId) $rid = (int)(db_val('SELECT id FROM racuni WHERE lokal_id=? AND sto_id=? AND status="otvoren" ORDER BY id DESC LIMIT 1', [$lid,$stoId]) ?: 0);
         if (!$rid) {
-            db_run('INSERT INTO racuni (lokal_id,sto_id,status,korisnik_id) VALUES (?,?,"otvoren",?)', [$lid,$stoId,$uid]);
+            $hh = happy_hour_popust(db_row('SELECT * FROM lokali WHERE id=?', [$lid]));
+            db_run('INSERT INTO racuni (lokal_id,sto_id,status,korisnik_id,popust_pct) VALUES (?,?,"otvoren",?,?)', [$lid,$stoId,$uid,$hh]);
             $rid = (int)db()->lastInsertId();
         }
         redirect(url('pos').'?racun='.$rid);
@@ -388,7 +389,7 @@ if ($rid) {
     ?>
     <div class="page-head">
       <div><a href="<?= url('pos') ?>?racun=<?= $rid ?>&nazad=1" class="btn btn--ghost btn--sm" style="margin-bottom:8px"><?= ico('back',16) ?> Nazad</a>
-        <h1><?= e($stoNaziv) ?></h1><p>Račun #<?= $rid ?> · otvoren</p></div>
+        <h1><?= e($stoNaziv) ?></h1><p>Račun #<?= $rid ?> · otvoren<?php $hhNow=happy_hour_popust(db_row('SELECT * FROM lokali WHERE id=?', [$lid])); if($hhNow>0):?> · <span class="badge badge--warn">Happy hour −<?= rtrim(rtrim(number_format($hhNow,2,',','.'),'0'),',') ?>%</span><?php endif;?></p></div>
     </div>
 
     <div class="toolbar" style="margin-bottom:14px">

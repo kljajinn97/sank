@@ -45,7 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['pos_token'] = $device['token'];
             db_run('UPDATE pos_uredjaji SET poslednja_aktivnost=NOW() WHERE id=?', [$device['id']]);
             // Radnik ide PRAVO na novi brzi (šank) račun
-            db_run('INSERT INTO racuni (lokal_id,sto_id,status,korisnik_id) VALUES (?,NULL,"otvoren",?)', [$device['lokal_id'], $ulogovan['id']]);
+            $hh = happy_hour_popust(db_row('SELECT * FROM lokali WHERE id=?', [$device['lokal_id']]));
+            db_run('INSERT INTO racuni (lokal_id,sto_id,status,korisnik_id,popust_pct) VALUES (?,NULL,"otvoren",?,?)', [$device['lokal_id'], $ulogovan['id'], $hh]);
             redirect(url('pos') . '?racun=' . (int)db()->lastInsertId());
         }
         flash('error','Pogrešan PIN.');

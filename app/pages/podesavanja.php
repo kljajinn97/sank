@@ -32,6 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash('success','Podaci o lokalu su sačuvani.');
         redirect(url('podesavanja'));
     }
+    if ($akcija === 'happy') {
+        $dani = (isset($_POST['dani']) && is_array($_POST['dani'])) ? implode(',', array_map('intval', $_POST['dani'])) : null;
+        db_run('UPDATE lokali SET hh_aktivan=?, hh_popust=?, hh_od=?, hh_do=?, hh_dani=? WHERE id=?',
+               [isset($_POST['hh_aktivan'])?1:0, to_num($_POST['hh_popust'] ?? 0), post('hh_od') ?: null, post('hh_do') ?: null, $dani, $lid]);
+        flash('success','Happy hour je sačuvan.');
+        redirect(url('podesavanja'));
+    }
     if ($akcija === 'kat_dodaj') {
         $naziv = post('naziv');
         $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#0d9488';
@@ -134,6 +141,35 @@ require __DIR__ . '/../partials/layout_top.php';
         </tbody>
       </table></div>
     </div>
+  </div>
+</div>
+
+<div class="card mt-2">
+  <div class="card__head"><div class="card__title">Happy hour</div>
+    <?php if($lokal['hh_aktivan']):?><span class="badge badge--ok">Uključen</span><?php endif;?></div>
+  <div class="card__body">
+    <form method="post" action="<?= url('podesavanja') ?>">
+      <?= csrf_field() ?><input type="hidden" name="akcija" value="happy">
+      <label class="flex items-center gap-2" style="cursor:pointer;margin-bottom:14px">
+        <input type="checkbox" name="hh_aktivan" value="1" <?= $lokal['hh_aktivan']?'checked':'' ?>>
+        <span><strong>Uključi Happy hour</strong> — automatski popust na nove račune u zadatom terminu</span>
+      </label>
+      <div class="form-row">
+        <div class="field"><label class="label">Popust (%)</label><input class="input" type="number" step="0.01" name="hh_popust" value="<?= e(rtrim(rtrim(number_format((float)($lokal['hh_popust']??0),2,'.',''),'0'),'.')) ?>"></div>
+        <div class="field"><label class="label">Od</label><input class="input" type="time" name="hh_od" value="<?= e($lokal['hh_od']?substr($lokal['hh_od'],0,5):'') ?>"></div>
+        <div class="field"><label class="label">Do</label><input class="input" type="time" name="hh_do" value="<?= e($lokal['hh_do']?substr($lokal['hh_do'],0,5):'') ?>"></div>
+      </div>
+      <div class="field"><label class="label">Dani</label>
+        <div class="flex gap-2" style="flex-wrap:wrap">
+          <?php $danNaz=[1=>'Pon',2=>'Uto',3=>'Sre',4=>'Čet',5=>'Pet',6=>'Sub',7=>'Ned']; $izabrani=array_filter(array_map('intval',explode(',',(string)($lokal['hh_dani']??'')))); ?>
+          <?php foreach($danNaz as $n=>$lbl): ?>
+            <label class="badge badge--muted" style="cursor:pointer;padding:8px 12px"><input type="checkbox" name="dani[]" value="<?= $n ?>" <?= in_array($n,$izabrani,true)?'checked':'' ?> style="margin-right:5px"><?= $lbl ?></label>
+          <?php endforeach; ?>
+        </div>
+        <div class="help">Ostavi sve prazno = svi dani. Popust se primenjuje na nove račune tokom termina.</div>
+      </div>
+      <button class="btn btn--primary">Sačuvaj happy hour</button>
+    </form>
   </div>
 </div>
 
