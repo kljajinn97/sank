@@ -36,7 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         db_run('UPDATE pos_uredjaji SET naziv=? WHERE id=? AND lokal_id=?', [post('naziv') ?: 'POS',(int)$_POST['id'],$lid]);
         redirect(url('uredjaji'));
     }
+    if ($akcija === 'stampa') {
+        db_run('UPDATE lokali SET auto_stampa=? WHERE id=?', [isset($_POST['auto_stampa'])?1:0, $lid]);
+        flash('success','Podešavanje štampe je sačuvano.');
+        redirect(url('uredjaji'));
+    }
 }
+$autoStampa = (int)(db_val('SELECT auto_stampa FROM lokali WHERE id=?', [$lid]) ?: 0);
 
 $kodovi = db_all('SELECT * FROM aktivacioni_kodovi WHERE lokal_id=? AND iskoriscen=0 ORDER BY created_at DESC', [$lid]);
 $uredjaji = db_all('SELECT * FROM pos_uredjaji WHERE lokal_id=? ORDER BY aktiviran_at DESC', [$lid]);
@@ -104,6 +110,31 @@ require __DIR__ . '/../partials/layout_top.php';
       <?php endforeach; endif; ?>
       </tbody>
     </table></div>
+  </div>
+</div>
+
+<div class="card mt-2">
+  <div class="card__head"><div class="card__title"><?= ico('print',17) ?> Štampa računa (termalni štampač)</div>
+    <?php if($autoStampa):?><span class="badge badge--ok">Auto-štampa uključena</span><?php endif;?></div>
+  <div class="card__body">
+    <form method="post" action="<?= url('uredjaji') ?>">
+      <?= csrf_field() ?><input type="hidden" name="akcija" value="stampa">
+      <label class="flex items-center gap-2" style="cursor:pointer;margin-bottom:14px">
+        <input type="checkbox" name="auto_stampa" value="1" <?= $autoStampa?'checked':'' ?> onchange="this.form.submit()">
+        <span><strong>Automatski štampaj račun posle naplate</strong> (otvara prozor za štampu)</span>
+      </label>
+    </form>
+    <div class="flash flash--info" style="margin:0">
+      <div>
+        <strong>Za štampu BEZ pitanja (tiho, direktno na termalni štampač):</strong>
+        <ol class="muted" style="margin:8px 0 0 18px;font-size:.88rem;line-height:1.7">
+          <li>Instaliraj drajver termalnog štampača na uređaj i postavi ga kao <strong>podrazumevani</strong> (širina papira 80mm).</li>
+          <li>Pokreći POS u Chrome-u sa prečicom koja ima parametar: <code>--kiosk-printing</code><br>
+              <span class="muted" style="font-size:.82rem">npr. cilj prečice: <code>chrome.exe --kiosk --kiosk-printing https://<?= e($_SERVER['HTTP_HOST'] ?? 'tvoj-domen') ?>/kasa</code></span></li>
+          <li>Svaka štampa (račun, predračun, nalog za pripremu) ide odmah na štampač — bez dijaloga.</li>
+        </ol>
+      </div>
+    </div>
   </div>
 </div>
 

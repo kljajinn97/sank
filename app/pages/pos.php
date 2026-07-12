@@ -268,7 +268,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     flash('error','Fiskalizacija nije uspela — proveri PFR/podešavanja.');
             }
         } catch (Throwable $e) { $pdo->rollBack(); flash('error','Greška: '.$e->getMessage()); }
-        redirect(url('pos'));
+        // Auto-štampa računa posle naplate (Chrome kiosk-printing štampa bez dijaloga)
+        $autoStampa = (int)(db_val('SELECT auto_stampa FROM lokali WHERE id=?', [$lid]) ?: 0);
+        redirect(url('pos') . ($autoStampa ? '?stampaj='.$rid : ''));
     }
 
     redirect(url('pos'));
@@ -301,7 +303,7 @@ if ($rid && !empty($_GET['kuhinja'])) {
           .it{font-size:19px;font-weight:800;padding:6px 0;border-bottom:1px solid #ccc}
           .nap{font-size:14px;font-weight:600;color:#333;padding-left:10px}
           @media print{@page{margin:4mm}}</style></head>
-        <body onload="window.print()">
+        <body onload="window.print()" onafterprint="setTimeout(function(){window.close()},300)">
           <div class="c b" style="font-size:16px">PRIPREMA</div>
           <div class="c big"><?= e($rr['sto'] ?: 'Šank') ?></div>
           <div class="c">Račun #<?= $rid ?> · <?= date('d.m. H:i') ?></div>
@@ -335,7 +337,7 @@ if ($rid && !empty($_GET['stampa'])) {
           table{width:100%;border-collapse:collapse}td{padding:2px 0;vertical-align:top}
           .tot{font-size:16px;font-weight:800}
           @media print{@page{margin:4mm}}
-        </style></head><body onload="window.print()">
+        </style></head><body onload="window.print()" onafterprint="setTimeout(function(){window.close()},300)">
           <div class="c"><h2><?= e($lok['naziv']) ?></h2>
             <?php if($lok['adresa']||$lok['grad']):?><div><?= e(trim(($lok['adresa']??'').' '.($lok['grad']??''))) ?></div><?php endif;?>
             <?php if($lok['pib']):?><div>PIB: <?= e($lok['pib']) ?></div><?php endif;?></div>
@@ -354,10 +356,12 @@ if ($rid && !empty($_GET['stampa'])) {
           <?php if($rr['popust_pct']>0): ?><table><tr><td>Popust <?= (int)$rr['popust_pct'] ?>%</td><td class="r">−<?= novac($sub-$total) ?></td></tr></table><?php endif; ?>
           <table><tr><td class="tot">UKUPNO</td><td class="r tot"><?= novac($total) ?></td></tr></table>
           <?php if($placen):?><div class="c" style="margin-top:6px">Plaćeno: <?= e(ucfirst($rr['nacin_placanja'] ?: '')) ?></div><?php endif;?>
+          <?php $fiskDemo = !empty($rr['fiskalizovan']) && ($lok['fisk_mode'] ?? '') === 'simulacija'; ?>
           <?php if(!empty($rr['fiskalizovan'])): ?>
             <hr>
+            <?php if($fiskDemo): ?><div class="c b" style="font-size:14px;border:2px dashed #000;padding:4px;margin-bottom:6px">ТЕСТ / DEMO РЕЖИМ</div><?php endif; ?>
             <div class="c" style="font-size:11px">
-              <span class="b">ФИСКАЛНИ РАЧУН</span><br>
+              <span class="b"><?= $fiskDemo ? 'ТЕСТ РАЧУН (није фискални)' : 'ФИСКАЛНИ РАЧУН' ?></span><br>
               ПФР број: <?= e($rr['pfr_broj']) ?><br>
               Бројач: <?= e($rr['pfr_brojac']) ?><br>
               <?= e($rr['pfr_vreme']) ?><br>
@@ -365,7 +369,7 @@ if ($rid && !empty($_GET['stampa'])) {
               <?php if(!empty($rr['pfr_url_ver'])): ?><span style="word-break:break-all;font-size:9px"><?= e($rr['pfr_url_ver']) ?></span><?php endif; ?>
             </div>
           <?php endif; ?>
-          <hr><div class="c" style="font-size:11px">Hvala i doviđenja!<br><?php if(empty($rr['fiskalizovan'])):?>Ovo nije fiskalni račun.<?php endif;?></div>
+          <hr><div class="c" style="font-size:11px">Hvala i doviđenja!<br><?php if(empty($rr['fiskalizovan']) || $fiskDemo):?>Ovo nije fiskalni račun.<?php endif;?></div>
         </body></html>
         <?php
         exit;
@@ -766,6 +770,9 @@ require $SHELL_TOP;
   </div>
 </div>
 <form id="openStoForm" method="post" style="display:none" onsubmit="SankUI.loading('Otvaram…')"><?= csrf_field() ?><input type="hidden" name="akcija" value="open"><input type="hidden" name="sto_id" id="openStoId"></form>
+<?php if (!empty($_GET['stampaj'])): $stId=(int)$_GET['stampaj']; ?>
+<script>window.open('<?= url('pos') ?>?racun=<?= $stId ?>&stampa=1','_blank','width=420,height=640');</script>
+<?php endif; ?>
 <script>
 var CSRF_TOKEN=<?= json_encode(csrf_token()) ?>, EDIT=false;
 function stoClick(id){ if(EDIT)return; document.getElementById('openStoId').value=id; document.getElementById('openStoForm').submit(); }
