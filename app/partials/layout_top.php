@@ -25,6 +25,7 @@ function nav_icon(string $k): string {
       'fakture'   => '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
       'troskovi'  => '<path d="M2 5h20v14H2zM2 10h20M6 15h4"/>',
       'izvestaji' => '<path d="M3 3v18h18M7 15l4-4 3 3 5-6"/>',
+      'prodaja'   => '<path d="M3 3v18h18M7 16v-4M12 16V9M17 16v-7"/>',
       'kep'       => '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
       'dan'       => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>',
       'pdv'       => '<path d="M19 5 5 19M6.5 6.5h.01M17.5 17.5h.01"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/>',
@@ -112,6 +113,7 @@ function nav_item(string $key, string $label, string $route, string $active): vo
         <div class="nav__label">Analitika</div>
         <?php
           nav_item('izvestaji','Izveštaji','izvestaji',$active);
+          nav_item('prodaja','Analitika prodaje','prodaja',$active);
           nav_item('dan','Zatvaranje dana','dan',$active);
           nav_item('pdv','PDV evidencija','pdv',$active);
           nav_item('kep','KEP knjiga','kep',$active);

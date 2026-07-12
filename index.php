@@ -37,6 +37,7 @@ $routes = [
     'fakture'    => 'fakture.php',
     'troskovi'   => 'troskovi.php',
     'izvestaji'  => 'izvestaji.php',
+    'prodaja'    => 'prodaja.php',
     'dan'        => 'dan.php',
     'pdv'        => 'pdv.php',
     'kep'        => 'kep.php',
