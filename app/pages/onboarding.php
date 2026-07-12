@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $akcija = $_POST['akcija'] ?? '';
 
     if ($akcija === 'lokal') {
-        $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#0d9488';
+        $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#b1662c';
         db_run('UPDATE lokali SET naziv=?, tip=?, grad=?, boja=? WHERE id=?',
                [post('naziv') ?: 'Moj lokal', post('tip') ?: null, post('grad') ?: null, $boja, $lid]);
         flash('success','Podaci o lokalu su sačuvani.');
@@ -76,7 +76,7 @@ require __DIR__ . '/../partials/layout_top.php';
           <div class="field"><label class="label">Grad</label><input class="input" name="grad" value="<?= e($lokal['grad']) ?>"></div>
         </div>
         <div class="field"><label class="label">Boja brenda</label><br>
-          <input type="color" name="boja" value="<?= e($lokal['boja'] ?: '#0d9488') ?>" style="width:56px;height:42px;border:1px solid var(--border);border-radius:10px;padding:2px;cursor:pointer">
+          <input type="color" name="boja" value="<?= e($lokal['boja'] ?: '#b1662c') ?>" style="width:56px;height:42px;border:1px solid var(--border);border-radius:10px;padding:2px;cursor:pointer">
           <span class="help">Menja izgled celog sistema.</span></div>
         <button class="btn btn--primary">Sačuvaj</button>
       </form>

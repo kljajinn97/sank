@@ -66,15 +66,22 @@ function nav_item(string $key, string $label, string $route, string $active): vo
 <div class="app">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar__brand">
-      <?php if (!is_super_admin() && !empty($u['lokal_logo'])): ?>
-        <img class="sidebar__logo-img" src="<?= e($u['lokal_logo']) ?>" alt="logo">
+      <?php if (is_super_admin()): ?>
+        <div>
+          <img class="sidebar__brandimg" src="<?= url('img/w_logo_full_white.png') ?>" alt="Waiter">
+          <div class="sidebar__sub" style="margin-top:6px">Administracija</div>
+        </div>
       <?php else: ?>
-        <div class="sidebar__logo"><?= is_super_admin() ? 'W' : e(mb_strtoupper(mb_substr($u['lokal_naziv'] ?? 'W',0,1))) ?></div>
+        <?php if (!empty($u['lokal_logo'])): ?>
+          <img class="sidebar__logo-img" src="<?= e($u['lokal_logo']) ?>" alt="logo">
+        <?php else: ?>
+          <div class="sidebar__logo"><?= e(mb_strtoupper(mb_substr($u['lokal_naziv'] ?? 'W',0,1))) ?></div>
+        <?php endif; ?>
+        <div>
+          <div class="sidebar__name"><?= e($u['lokal_naziv'] ?? 'Waiter') ?></div>
+          <div class="sidebar__sub">Waiter sistem</div>
+        </div>
       <?php endif; ?>
-      <div>
-        <div class="sidebar__name"><?= is_super_admin() ? 'Waiter' : e($u['lokal_naziv'] ?? 'Waiter') ?></div>
-        <div class="sidebar__sub"><?= is_super_admin() ? 'Administracija' : 'Waiter sistem' ?></div>
-      </div>
     </div>
 
     <nav class="nav">

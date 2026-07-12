@@ -3,7 +3,7 @@
 $t = trim($_GET['t'] ?? '');
 $lok = $t !== '' ? db_row('SELECT * FROM lokali WHERE javni_token=? LIMIT 1', [$t]) : null;
 $dostupno = $lok && !empty($lok['meni_aktivan']);
-$boja = $lok['boja'] ?? '#0d9488';
+$boja = $lok['boja'] ?? '#b1662c';
 
 $kat = $art = [];
 if ($dostupno) {
@@ -25,7 +25,7 @@ if ($dostupno) {
 <body style="background:var(--bg)">
 <?php if (!$dostupno): ?>
   <div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px">
-    <div><div class="sidebar__logo" style="width:56px;height:56px;font-size:26px;margin:0 auto 14px">W</div>
+    <div><img src="<?= url('img/w_logo_color.png') ?>" alt="Waiter" style="height:64px;margin:0 auto 14px;display:block">
       <h2>Meni trenutno nije dostupan</h2><p class="muted">Obrati se osoblju.</p></div>
   </div>
 <?php else: ?>

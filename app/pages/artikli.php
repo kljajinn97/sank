@@ -80,7 +80,7 @@ if ($pretraga !== '') { $sql .= ' AND a.naziv LIKE ?'; $par[] = '%'.$pretraga.'%
 $sql .= ' ORDER BY a.aktivan DESC, a.naziv';
 $artikli = db_all($sql, $par);
 
-function tile_boja($a){ return $a['boja'] ?: ($a['kat_boja'] ?: '#0d9488'); }
+function tile_boja($a){ return $a['boja'] ?: ($a['kat_boja'] ?: '#b1662c'); }
 function kolq($v){ return rtrim(rtrim(number_format((float)$v,3,',','.'),'0'),',') ?: '0'; }
 
 $page_title = 'Artikli i cenovnik';
@@ -206,7 +206,7 @@ require __DIR__ . '/../partials/layout_top.php';
       <div class="modal__section-title">Izgled</div>
       <div class="form-row">
         <div class="field"><label class="label">Boja pločice</label>
-          <input type="color" name="boja" id="a_boja" value="#0d9488" style="width:52px;height:42px;border:1px solid var(--border);border-radius:10px;padding:2px;cursor:pointer">
+          <input type="color" name="boja" id="a_boja" value="#b1662c" style="width:52px;height:42px;border:1px solid var(--border);border-radius:10px;padding:2px;cursor:pointer">
           <span class="help">Koristi se ako nema slike.</span></div>
         <div class="field"><label class="label">Slika (do 400 KB)</label>
           <input class="input" type="file" name="slika" accept="image/*">
@@ -226,7 +226,7 @@ function openArtikal(a){
   a_id.value=a.id||0; a_title.textContent=a.id?'Izmena artikla':'Novi artikal';
   a_naziv.value=a.naziv||''; a_opis.value=a.opis||''; a_jm.value=a.jedinica_mere||'kom';
   a_nab.value=a.nabavna_cena||0; a_pro.value=a.prodajna_cena||0; a_min.value=a.min_zaliha||0;
-  a_kat.value=a.kategorija_id||0; a_boja.value=a.boja||'#0d9488';
+  a_kat.value=a.kategorija_id||0; a_boja.value=a.boja||'#b1662c';
   document.getElementById('a_oznaka').value=a.poreska_oznaka||'Ђ';
   document.getElementById('a_ukloni_wrap').style.display=a.id?'flex':'none';
   mArtikal.showModal();

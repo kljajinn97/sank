@@ -28,11 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="auth">
   <aside class="auth__aside">
     <div class="auth__brand">
-      <div class="sidebar__logo">W</div> Waiter
+      <img class="auth__logo" src="<?= url('img/w_logo_full_white.png') ?>" alt="Waiter">
     </div>
     <div class="auth__pitch">
-      <h1>Digitalna knjiga šanka</h1>
-      <p>Pazar, roba, zalihe i izveštaji — sve na jednom mestu, jednostavno i pregledno.</p>
+      <h1>Tvoj lokal, pod kontrolom.</h1>
+      <p>POS, pazar, roba, zalihe i izveštaji — sve na jednom mestu, jednostavno i pregledno.</p>
       <div class="auth__features">
         <div class="auth__feature"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Dnevni pazar po smenama</div>
         <div class="auth__feature"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Artikli, cene i zalihe</div>
@@ -45,6 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="auth__main">
     <form class="auth__form" method="post" action="<?= url('login') ?>">
       <?= csrf_field() ?>
+      <img class="brand-glyph only-light" src="<?= url('img/w_logo_color.png') ?>" alt="" style="margin-bottom:14px">
+      <img class="brand-glyph only-dark" src="<?= url('img/w_logo_white.png') ?>" alt="" style="margin-bottom:14px">
       <h2>Dobrodošli nazad</h2>
       <p class="muted">Prijavi se na svoj nalog.</p>
 

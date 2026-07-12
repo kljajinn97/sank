@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($akcija === 'lokal') {
         $boja = post('boja');
-        if (!preg_match('/^#[0-9a-fA-F]{6}$/', $boja)) $boja = '#0d9488';
+        if (!preg_match('/^#[0-9a-fA-F]{6}$/', $boja)) $boja = '#b1662c';
         db_run('UPDATE lokali SET naziv=?, tip=?, adresa=?, grad=?, telefon=?, pib=?, valuta=?, pdv_stopa=?, boja=? WHERE id=?',
                [post('naziv'), post('tip') ?: null, post('adresa') ?: null, post('grad') ?: null,
                 post('telefon') ?: null, post('pib') ?: null, post('valuta') ?: 'RSD', to_num($_POST['pdv_stopa'] ?? 20), $boja, $lid]);
@@ -41,12 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if ($akcija === 'kat_dodaj') {
         $naziv = post('naziv');
-        $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#0d9488';
+        $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#b1662c';
         if ($naziv !== '') { db_run('INSERT INTO kategorije (lokal_id,naziv,boja) VALUES (?,?,?)', [$lid,$naziv,$boja]); flash('success','Kategorija je dodata.'); }
         redirect(url('podesavanja'));
     }
     if ($akcija === 'kat_boja') {
-        $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#0d9488';
+        $boja = preg_match('/^#[0-9a-fA-F]{6}$/', $_POST['boja'] ?? '') ? $_POST['boja'] : '#b1662c';
         db_run('UPDATE kategorije SET boja=? WHERE id=? AND lokal_id=?', [$boja,(int)$_POST['id'],$lid]);
         redirect(url('podesavanja'));
     }
@@ -92,7 +92,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <div class="form-row">
           <div class="field"><label class="label">Boja brenda</label>
             <div class="flex gap-2 items-center">
-              <input type="color" name="boja" id="bojaInput" value="<?= e($lokal['boja'] ?: '#0d9488') ?>" style="width:52px;height:42px;border:1px solid var(--border);border-radius:10px;background:none;cursor:pointer;padding:2px;">
+              <input type="color" name="boja" id="bojaInput" value="<?= e($lokal['boja'] ?: '#b1662c') ?>" style="width:52px;height:42px;border:1px solid var(--border);border-radius:10px;background:none;cursor:pointer;padding:2px;">
               <span class="help" style="margin:0">Menja boju celog interfejsa tvog lokala.</span>
             </div>
           </div>
@@ -116,7 +116,7 @@ require __DIR__ . '/../partials/layout_top.php';
     <div class="card__body">
       <form method="post" action="<?= url('podesavanja') ?>" class="flex gap-2" style="margin-bottom:16px">
         <?= csrf_field() ?><input type="hidden" name="akcija" value="kat_dodaj">
-        <input type="color" name="boja" value="#0d9488" style="width:44px;height:42px;border:1px solid var(--border);border-radius:10px;padding:2px;cursor:pointer" title="Boja kategorije">
+        <input type="color" name="boja" value="#b1662c" style="width:44px;height:42px;border:1px solid var(--border);border-radius:10px;padding:2px;cursor:pointer" title="Boja kategorije">
         <input class="input" name="naziv" placeholder="Nova kategorija (npr. Topli napici)" required>
         <button class="btn btn--primary">Dodaj</button>
       </form>
@@ -128,7 +128,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <?php else: foreach ($kategorije as $k): ?>
           <tr>
             <td><form method="post" style="margin:0"><?= csrf_field() ?><input type="hidden" name="akcija" value="kat_boja"><input type="hidden" name="id" value="<?= $k['id'] ?>">
-              <input type="color" name="boja" value="<?= e($k['boja'] ?: '#0d9488') ?>" onchange="this.form.submit()" style="width:36px;height:30px;border:1px solid var(--border);border-radius:7px;padding:1px;cursor:pointer" title="Promeni boju"></form></td>
+              <input type="color" name="boja" value="<?= e($k['boja'] ?: '#b1662c') ?>" onchange="this.form.submit()" style="width:36px;height:30px;border:1px solid var(--border);border-radius:7px;padding:1px;cursor:pointer" title="Promeni boju"></form></td>
             <td><strong><?= e($k['naziv']) ?></strong></td>
             <td class="num"><?= (int)$k['br'] ?></td>
             <td class="text-right">

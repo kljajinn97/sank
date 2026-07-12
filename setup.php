@@ -77,7 +77,8 @@ catch (Throwable $e) { $db_err = $e->getMessage(); }
 <body style="background:var(--bg);">
 <div style="max-width:520px;margin:6vh auto;padding:20px;">
   <div style="display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:26px;">
-    <div class="sidebar__logo" style="width:46px;height:46px;font-size:24px;">W</div>
+    <img class="brand-glyph only-light" src="<?= url('img/w_logo_color.png') ?>" alt="Waiter" style="height:52px">
+    <img class="brand-glyph only-dark" src="<?= url('img/w_logo_white.png') ?>" alt="Waiter" style="height:52px;display:none">
     <div style="font-size:1.6rem;font-weight:800;">Waiter — instalacija</div>
   </div>
 

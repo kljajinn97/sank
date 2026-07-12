@@ -434,7 +434,7 @@ if ($rid) {
         </div>
         <div class="pgrid" id="prodGrid">
           <?php foreach ($artikli as $a):
-            $b = $a['boja'] ?: '#0d9488';
+            $b = $a['boja'] ?: '#b1662c';
             $style = $a['slika'] ? "background-image:url('".e($a['slika'])."')" : "background:linear-gradient(135deg,$b,{$b}cc)";
           ?>
             <div class="ptile" data-cat="<?= (int)$a['kategorija_id'] ?>" onclick="addItem(<?= $a['id'] ?>)">

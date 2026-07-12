@@ -64,7 +64,8 @@ require __DIR__ . '/../partials/kasa_top.php';
 <?php $lok = $device ? db_row('SELECT naziv,logo FROM lokali WHERE id=?', [$device['lokal_id']]) : null; ?>
 <?php if (!$device): ?>
   <div class="kasa-center"><div class="kasa-box">
-    <div class="sidebar__logo" style="width:64px;height:64px;font-size:30px;margin:0 auto 18px">W</div>
+    <img class="brand-glyph only-light" src="<?= url('img/w_logo_color.png') ?>" alt="Waiter" style="height:72px;margin:0 auto 18px;display:block">
+    <img class="brand-glyph only-dark" src="<?= url('img/w_logo_white.png') ?>" alt="Waiter" style="height:72px;margin:0 auto 18px;display:none">
     <h2>Aktivacija POS uređaja</h2>
     <p class="muted" style="margin-bottom:24px">Unesi aktivacioni kod koji si dobio od administratora. Uređaj se vezuje za tvoj lokal.</p>
     <form method="post" action="<?= url('kasa') ?>">
@@ -78,9 +79,10 @@ require __DIR__ . '/../partials/kasa_top.php';
   <div class="pin-screen">
     <div class="pin-hero">
       <div class="pin-hero__top">
-        <?php if(!empty($lok['logo'])): ?><img class="pin-hero__logo" src="<?= e($lok['logo']) ?>" alt="">
-        <?php else: ?><div class="pin-hero__logo"><?= e(mb_strtoupper(mb_substr($lok['naziv'] ?? 'W',0,1))) ?></div><?php endif; ?>
-        <div class="pin-hero__name"><?= e($lok['naziv'] ?? 'Waiter POS') ?></div>
+        <span class="pin-hero__lokal">
+          <?php if(!empty($lok['logo'])): ?><img src="<?= e($lok['logo']) ?>" alt=""><?php endif; ?>
+          <?= e($lok['naziv'] ?? 'Waiter POS') ?>
+        </span>
       </div>
       <div class="pin-hero__mid">
         <div class="pin-clock" id="clock">--:--</div>

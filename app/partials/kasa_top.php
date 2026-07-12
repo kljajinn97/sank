@@ -15,7 +15,7 @@ $kasa_title = $kasa_title ?? 'POS';
 <?php if (!empty($lok['boja'])): ?><style>:root{--brand: <?= e($lok['boja']) ?>;}</style><?php endif; ?>
 <link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
 <link rel="manifest" href="/manifest.webmanifest">
-<meta name="theme-color" content="<?= e($lok['boja'] ?? '#0d9488') ?>">
+<meta name="theme-color" content="<?= e($lok['boja'] ?? '#b1662c') ?>">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="<?= e($lok['naziv'] ?? 'Waiter POS') ?>">
 <link rel="apple-touch-icon" href="/assets/icon.svg">

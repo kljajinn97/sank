@@ -4,8 +4,9 @@
    ============================================================ */
 
 :root {
-  /* Brend boje — sve se izvode iz --brand (može se menjati po lokalu) */
-  --brand:        #0d9488;
+  /* Brend boje — sve se izvode iz --brand (može se menjati po lokalu)
+     Waiter default: topli bakar (uz espresso pozadine i amber akcente) */
+  --brand:        #b1662c;
   --brand-600:    color-mix(in srgb, var(--brand), #000 14%);
   --brand-700:    color-mix(in srgb, var(--brand), #000 28%);
   --brand-soft:   color-mix(in srgb, var(--brand), #fff 84%);
@@ -31,12 +32,12 @@
   --text-2:    #475569;
   --text-3:    #94a3b8;
 
-  /* Sidebar (tamni) */
-  --side-bg:   #0f1720;
-  --side-bg-2: #16212e;
-  --side-text: #cbd5e1;
-  --side-muted:#64748b;
-  --side-active:#0d9488;
+  /* Sidebar (espresso — uz Waiter brend) */
+  --side-bg:   #15100c;
+  --side-bg-2: #1e1712;
+  --side-text: #d6cdc4;
+  --side-muted:#7d7166;
+  --side-active: var(--brand);
 
   /* Sistem */
   --radius:    14px;
@@ -140,7 +141,7 @@ h3 { font-size: 1.05rem; }
 }
 .nav__item:hover { background: rgba(255,255,255,.06); text-decoration: none; color: #fff; }
 .nav__item.is-active {
-  background: linear-gradient(135deg, rgba(13,148,136,.25), rgba(13,148,136,.12));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--brand) 30%, transparent), color-mix(in srgb, var(--brand) 14%, transparent));
   color: #fff;
   box-shadow: inset 3px 0 0 var(--side-active);
 }
@@ -932,6 +933,55 @@ dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3p
   box-shadow: 0 8px 18px -8px rgba(22,163,74,.6); transition: transform .12s;
 }
 .kds-item__done:active { transform: scale(.94); }
+
+/* ---- Waiter brend slike (logo + pozadine) ---- */
+.only-dark { display: none !important; }
+:root[data-theme="dark"] .only-dark { display: inline-block !important; }
+:root[data-theme="dark"] .only-light { display: none !important; }
+
+.brand-full { height: 34px; width: auto; display: block; }
+.brand-glyph { height: 60px; width: auto; }
+
+/* BO login — leva strana sa bo_bg fotkom */
+.auth__aside {
+  background:
+    linear-gradient(165deg, rgba(24,15,9,.88), rgba(24,15,9,.55) 45%, rgba(90,45,15,.35)),
+    url('/img/bo_bg.png') center/cover no-repeat;
+}
+.auth__aside::after, .auth__aside::before { display: none; }
+.auth__logo { height: 52px; width: auto; }
+.auth__main {
+  background:
+    radial-gradient(700px 400px at 100% 0%, color-mix(in srgb, var(--brand) 8%, transparent), transparent 60%),
+    var(--surface);
+}
+
+/* POS lock ekran — pos_bg fotka iza hero panela */
+.pin-hero {
+  background:
+    linear-gradient(120deg, rgba(18,11,7,.72), rgba(18,11,7,.35) 55%, rgba(18,11,7,.55)),
+    url('/img/pos_bg.png') center/cover no-repeat;
+}
+.pin-hero::before, .pin-hero::after { display: none; }
+.pin-hero__top { justify-content: flex-end; }
+.pin-hero__lokal {
+  display: inline-flex; align-items: center; gap: 9px;
+  background: rgba(0,0,0,.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 8px 16px;
+  font-weight: 700; color: #fff;
+}
+.pin-hero__lokal img { width: 26px; height: 26px; border-radius: 7px; object-fit: cover; background: #fff; }
+.pin-clock { text-shadow: 0 4px 24px rgba(0,0,0,.5); }
+.pin-date { text-shadow: 0 2px 12px rgba(0,0,0,.5); }
+.pin-hero__foot { opacity: .85; text-shadow: 0 2px 8px rgba(0,0,0,.6); }
+.pin-side {
+  background:
+    radial-gradient(500px 300px at 50% 0%, color-mix(in srgb, var(--brand) 7%, transparent), transparent 70%),
+    var(--surface);
+}
+
+/* Sidebar — Waiter full logo za administraciju */
+.sidebar__brandimg { height: 30px; width: auto; display: block; }
 
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
