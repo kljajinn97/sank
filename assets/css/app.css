@@ -450,6 +450,7 @@ h3 { font-size: 1.05rem; }
 .cart-row__act { display: flex; align-items: center; gap: 2px; }
 .cart-row__note { background: none; border: none; color: var(--text-3); cursor: pointer; padding: 2px; display: grid; place-items: center; border-radius: 6px; }
 .cart-row__note:hover { color: var(--brand-700); background: var(--brand-soft); }
+.cart-sent { color: var(--ok); font-size: .6rem; vertical-align: middle; }
 
 .stolovi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px,1fr)); gap: 12px; }
 .sto-card {

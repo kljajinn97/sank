@@ -39,7 +39,8 @@ function racun_json(int $rid, int $lid): void {
     echo json_encode([
         'stavke' => array_map(fn($s)=>[
             'id'=>(int)$s['id'],'naziv'=>$s['naziv'],'cena'=>(float)$s['cena'],
-            'kolicina'=>(float)$s['kolicina'],'iznos'=>(float)$s['iznos'],'napomena'=>$s['napomena'] ?? ''
+            'kolicina'=>(float)$s['kolicina'],'iznos'=>(float)$s['iznos'],'napomena'=>$s['napomena'] ?? '',
+            'poslato'=>(int)($s['poslato'] ?? 0)
         ], $d['stavke'] ?? []),
         'sub'=>$d['sub'] ?? 0, 'popust'=>(float)($d['racun']['popust_pct'] ?? 0), 'total'=>$d['total'] ?? 0,
     ]);
@@ -285,6 +286,37 @@ if ($rid && isset($_GET['nazad'])) {
     redirect(url('pos'));
 }
 
+// Nalog za pripremu (kuhinja/šank) — štampa nove stavke i markira poslato
+if ($rid && !empty($_GET['kuhinja'])) {
+    $rr = db_row('SELECT r.*, s.naziv AS sto FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id WHERE r.id=? AND r.lokal_id=?', [$rid,$lid]);
+    if ($rr) {
+        $nove = db_all('SELECT * FROM racun_stavke WHERE racun_id=? AND poslato=0 ORDER BY id', [$rid]);
+        if ($nove) db_run('UPDATE racun_stavke SET poslato=1 WHERE racun_id=? AND poslato=0', [$rid]);
+        ?><!DOCTYPE html><html lang="sr"><head><meta charset="utf-8"><title>Nalog #<?= $rid ?></title>
+        <style>*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+          body{width:80mm;margin:0 auto;padding:10px;color:#000}
+          .c{text-align:center}.b{font-weight:800}hr{border:none;border-top:2px dashed #000;margin:8px 0}
+          .big{font-size:20px;font-weight:800;margin:6px 0}
+          .it{font-size:19px;font-weight:800;padding:6px 0;border-bottom:1px solid #ccc}
+          .nap{font-size:14px;font-weight:600;color:#333;padding-left:10px}
+          @media print{@page{margin:4mm}}</style></head>
+        <body onload="window.print()">
+          <div class="c b" style="font-size:16px">PRIPREMA</div>
+          <div class="c big"><?= e($rr['sto'] ?: 'Šank') ?></div>
+          <div class="c">Račun #<?= $rid ?> · <?= date('d.m. H:i') ?></div>
+          <hr>
+          <?php if (!$nove): ?>
+            <div class="c" style="padding:14px 0">Nema novih stavki.</div>
+          <?php else: foreach ($nove as $s): ?>
+            <div class="it"><?= rtrim(rtrim(number_format((float)$s['kolicina'],3,',','.'),'0'),',') ?> ×  <?= e($s['naziv']) ?></div>
+            <?php if(!empty($s['napomena'])): ?><div class="nap">» <?= e($s['napomena']) ?></div><?php endif; ?>
+          <?php endforeach; endif; ?>
+          <hr>
+        </body></html><?php
+        exit;
+    }
+}
+
 if ($rid && !empty($_GET['stampa'])) {
     $rr = db_row('SELECT r.*, s.naziv AS sto FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id WHERE r.id=? AND r.lokal_id=?', [$rid,$lid]);
     if ($rr) {
@@ -360,6 +392,7 @@ if ($rid) {
     </div>
 
     <div class="toolbar" style="margin-bottom:14px">
+      <button class="btn btn--primary btn--sm" onclick="posaljiNalog()"><?= ico('send',16) ?> Pošalji nalog</button>
       <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racun=<?= $rid ?>&stampa=1" target="_blank"><?= ico('print',16) ?> Predračun</a>
       <button class="btn btn--ghost btn--sm" onclick="mPremesti.showModal()"><?= ico('move',16) ?> Premesti sto</button>
       <?php if ($openOther): ?><button class="btn btn--ghost btn--sm" onclick="mSpoji.showModal()"><?= ico('merge',16) ?> Spoji</button><?php endif; ?>
@@ -468,6 +501,14 @@ if ($rid) {
     var NOTE_SVG='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
     async function setQtyDirect(id){ var v=await SankUI.prompt('Unesi količinu:',{title:'Količina',ok:'Sačuvaj'}); if(v===null)return; var n=parseFloat(String(v).replace(',','.')); if(isNaN(n)||n<0){SankUI.toast('Neispravna količina','error');return;} render(await api('set_qty',{stavka_id:id,kolicina:n})); }
     async function setNote(id){ var st=((window.CART&&window.CART.stavke)||[]).find(function(x){return x.id==id;}); var v=await SankUI.prompt('Napomena za stavku:',{title:'Napomena',ok:'Sačuvaj',value:st?st.napomena:''}); if(v===null)return; render(await api('napomena',{stavka_id:id,napomena:v})); }
+    async function refreshCart(){ render(await api('popust',{popust_pct:document.getElementById('popustInp').value||0})); }
+    function posaljiNalog(){
+      var nove=((window.CART&&window.CART.stavke)||[]).filter(function(x){return !x.poslato;});
+      if(!nove.length){ SankUI.toast('Nema novih stavki za slanje','info'); return; }
+      window.open('<?= url('pos') ?>?racun=<?= $rid ?>&kuhinja=1','_blank');
+      SankUI.toast('Nalog poslat u pripremu','success');
+      setTimeout(refreshCart,700);
+    }
     async function api(akcija,extra){
       const body=new URLSearchParams(Object.assign({akcija,ajax:1,racun_id:RID,_csrf:CSRF},extra||{}));
       const res=await fetch('<?= url('pos') ?>',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
@@ -480,7 +521,7 @@ if ($rid) {
       else{box.innerHTML=d.stavke.map(s=>`
         <div class="cart-row">
           <div class="cart-row__info">
-            <div class="cart-row__name">${esc(s.naziv)}</div>
+            <div class="cart-row__name">${esc(s.naziv)}${s.poslato?' <span class="cart-sent" title="Poslato u pripremu">●</span>':''}</div>
             <div class="cart-row__price muted">${fmt(s.cena)}${s.napomena?` · <span style="color:var(--brand-700)">${esc(s.napomena)}</span>`:''}</div>
           </div>
           <div class="cart-row__qty">

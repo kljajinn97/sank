@@ -126,6 +126,8 @@ function ico(string $name, int $size = 20): string
       'download' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
       'warn'     => '<path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
       'wave'     => '<path d="M4 12a4 4 0 0 0 8 0 4 4 0 0 1 8 0"/>',
+      'send'     => '<path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"/>',
+      'kuhinja'  => '<path d="M6 2v7a3 3 0 0 0 6 0V2M9 9v13M17 2c-1.7 0-3 2-3 5s1 4 3 4v11"/>',
     ];
     $d = $p[$name] ?? '';
     return '<svg class="ico" width="'.$size.'" height="'.$size.'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'.$d.'</svg>';
