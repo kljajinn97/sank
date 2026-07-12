@@ -294,7 +294,7 @@ if ($rid && !empty($_GET['kuhinja'])) {
     $rr = db_row('SELECT r.*, s.naziv AS sto FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id WHERE r.id=? AND r.lokal_id=?', [$rid,$lid]);
     if ($rr) {
         $nove = db_all('SELECT * FROM racun_stavke WHERE racun_id=? AND poslato=0 ORDER BY id', [$rid]);
-        if ($nove) db_run('UPDATE racun_stavke SET poslato=1 WHERE racun_id=? AND poslato=0', [$rid]);
+        if ($nove) db_run('UPDATE racun_stavke SET poslato=1, poslato_at=NOW() WHERE racun_id=? AND poslato=0', [$rid]);
         ?><!DOCTYPE html><html lang="sr"><head><meta charset="utf-8"><title>Nalog #<?= $rid ?></title>
         <style>*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
           body{width:80mm;margin:0 auto;padding:10px;color:#000}

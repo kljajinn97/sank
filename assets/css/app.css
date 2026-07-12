@@ -898,6 +898,41 @@ dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3p
 .tabs a { transition: background .14s, color .14s, box-shadow .14s, transform .12s; }
 .tabs a:active { transform: scale(.97); }
 
+/* ---- KDS (kuhinjski ekran) ---- */
+.kds { max-width: 1400px; margin: 0 auto; }
+.kds__head { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.kds__head h1 { margin: 0; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+.kds__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; }
+.kds-card {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 18px;
+  overflow: hidden; box-shadow: var(--shadow-sm); animation: pageIn .3s both;
+}
+.kds-card__head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 16px; font-size: 1.05rem;
+  background: color-mix(in srgb, var(--brand) 10%, var(--surface)); border-bottom: 1px solid var(--border);
+}
+.kds-card__time { font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.kds-card.is-warn { border-color: var(--warn); }
+.kds-card.is-warn .kds-card__head { background: var(--warn-soft); }
+.kds-card.is-warn .kds-card__time { color: #b45309; }
+.kds-card.is-late { border-color: var(--danger); animation: kdsPulse 1.6s infinite; }
+.kds-card.is-late .kds-card__head { background: var(--danger-soft); }
+.kds-card.is-late .kds-card__time { color: #b91c1c; }
+@keyframes kdsPulse { 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.28)} 50%{box-shadow:0 0 0 7px rgba(220,38,38,0)} }
+.kds-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px dashed var(--border); }
+.kds-item:last-child { border-bottom: none; }
+.kds-item__txt { flex: 1; font-weight: 700; font-size: 1.06rem; }
+.kds-item__qty { color: var(--brand-700); font-weight: 800; }
+:root[data-theme="dark"] .kds-item__qty { color: color-mix(in srgb, var(--brand), #fff 35%); }
+.kds-item__note { font-size: .86rem; font-weight: 600; color: var(--warn); margin-top: 2px; }
+.kds-item__done {
+  border: none; border-radius: 11px; padding: 10px 16px; font-weight: 800; cursor: pointer; font-family: inherit;
+  background: linear-gradient(140deg, var(--ok), #15803d); color: #fff;
+  box-shadow: 0 8px 18px -8px rgba(22,163,74,.6); transition: transform .12s;
+}
+.kds-item__done:active { transform: scale(.94); }
+
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

@@ -27,6 +27,7 @@ $routes = [
 
     // POS terminal (odvojena aplikacija)
     'kasa'       => 'kasa.php',
+    'kds'        => 'kds.php',
     'uredjaji'   => 'uredjaji.php',
     'qrmeni'     => 'qrmeni.php',
 

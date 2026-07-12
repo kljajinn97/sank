@@ -64,6 +64,7 @@ require __DIR__ . '/../partials/layout_top.php';
     <li>Generiši aktivacioni kod (dugme gore).</li>
     <li>Na uređaju u lokalu otvori <strong><?= e($_SERVER['HTTP_HOST'] ?? 'tvoj-domen') ?>/kasa</strong> i unesi kod.</li>
     <li>Radnici se prijavljuju svojim <strong>PIN-om</strong> (postavi ga u „Zaposleni"). Trenutno <?= $brPin ?> radnika ima PIN.</li>
+    <li><strong>Kuhinjski ekran (KDS):</strong> na tabletu u kuhinji aktiviraj uređaj pa otvori <strong><?= e($_SERVER['HTTP_HOST'] ?? 'tvoj-domen') ?>/kds</strong> — porudžbine stižu uživo (zvuk + tajmer), kuvar klikne „Spremno".</li>
   </ol>
 </div></div>
 
