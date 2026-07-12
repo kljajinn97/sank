@@ -46,8 +46,11 @@ if (is_super_admin()):
     $brLokala   = (int)db()->query('SELECT COUNT(*) FROM lokali')->fetchColumn();
     $brAktivnih = (int)db()->query("SELECT COUNT(*) FROM lokali WHERE status='aktivan'")->fetchColumn();
     $brKorisnika= (int)db()->query("SELECT COUNT(*) FROM korisnici WHERE uloga<>'super_admin'")->fetchColumn();
-    $isticu     = db()->query("SELECT COUNT(*) FROM lokali WHERE pretplata_do IS NOT NULL AND pretplata_do <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND status='aktivan'")->fetchColumn();
-    $noviLokali = db()->query('SELECT * FROM lokali ORDER BY created_at DESC LIMIT 6')->fetchAll();
+    $isticu     = (int)db()->query("SELECT COUNT(*) FROM lokali WHERE pretplata_do IS NOT NULL AND pretplata_do <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) AND pretplata_do >= CURDATE() AND status='aktivan'")->fetchColumn();
+    $istekle    = (int)db()->query("SELECT COUNT(*) FROM lokali WHERE pretplata_do IS NOT NULL AND pretplata_do < CURDATE() AND status='aktivan'")->fetchColumn();
+    $prometMesec= (float)db()->query("SELECT COALESCE(SUM(iznos),0) FROM pazar WHERE YEAR(datum)=YEAR(CURDATE()) AND MONTH(datum)=MONTH(CURDATE())")->fetchColumn();
+    $brUredjaja = (int)db()->query("SELECT COUNT(*) FROM pos_uredjaji WHERE status='aktivan'")->fetchColumn();
+    $noviLokali = db()->query('SELECT l.*, (SELECT COALESCE(SUM(iznos),0) FROM pazar p WHERE p.lokal_id=l.id AND YEAR(p.datum)=YEAR(CURDATE()) AND MONTH(p.datum)=MONTH(CURDATE())) AS promet FROM lokali l ORDER BY l.created_at DESC LIMIT 8')->fetchAll();
 ?>
   <div class="page-head">
     <div><h1>Zdravo, <?= e($u['ime']) ?></h1><p>Pregled celog sistema — svi lokali i nalozi.</p></div>
@@ -57,25 +60,27 @@ if (is_super_admin()):
     <div class="stat"><div class="stat__icon i-teal"><?= stat_svg('lokali') ?></div>
       <div class="stat__label">Ukupno lokala</div><div class="stat__value"><?= $brLokala ?></div>
       <div class="stat__delta up"><?= $brAktivnih ?> aktivnih</div></div>
+    <div class="stat"><div class="stat__icon i-green"><?= stat_svg('novac') ?></div>
+      <div class="stat__label">Promet svih lokala (mesec)</div><div class="stat__value in"><?= novac($prometMesec) ?></div></div>
     <div class="stat"><div class="stat__icon i-blue"><?= stat_svg('korisnici') ?></div>
-      <div class="stat__label">Korisnika (nalozi)</div><div class="stat__value"><?= $brKorisnika ?></div></div>
-    <div class="stat"><div class="stat__icon i-amber"><?= stat_svg('kalendar') ?></div>
-      <div class="stat__label">Pretplate ističu (7 dana)</div><div class="stat__value"><?= $isticu ?></div>
-      <div class="stat__delta"><?= $isticu>0 ? 'Proveri i obavesti' : 'Sve u redu' ?></div></div>
+      <div class="stat__label">Korisnika · POS uređaja</div><div class="stat__value"><?= $brKorisnika ?> · <?= $brUredjaja ?></div></div>
+    <div class="stat"><div class="stat__icon <?= $istekle?'i-amber':'i-teal' ?>"><?= stat_svg('kalendar') ?></div>
+      <div class="stat__label">Pretplate</div><div class="stat__value <?= $istekle?'out':'' ?>"><?= $istekle ?> isteklo</div>
+      <div class="stat__delta"><?= $isticu ?> ističe za 7 dana</div></div>
   </div>
   <div class="card">
     <div class="card__head"><div class="card__title">Najnoviji lokali</div>
       <a class="btn btn--ghost btn--sm" href="<?= url('admin/lokali') ?>">Svi lokali →</a></div>
     <div class="table-wrap"><table class="table">
-      <thead><tr><th>Lokal</th><th>Grad</th><th>Status</th><th>Pretplata do</th><th>Kreiran</th></tr></thead>
+      <thead><tr><th>Lokal</th><th>Grad</th><th class="num">Promet (mesec)</th><th>Status</th><th>Pretplata do</th></tr></thead>
       <tbody>
       <?php if (!$noviLokali): ?><tr><td colspan="5"><div class="empty">Još nema lokala.</div></td></tr>
-      <?php else: foreach ($noviLokali as $l): ?>
+      <?php else: foreach ($noviLokali as $l): $istekla=$l['pretplata_do']&&strtotime($l['pretplata_do'])<strtotime('today'); ?>
         <tr><td><strong><?= e($l['naziv']) ?></strong><?php if($l['tip']):?><div class="muted" style="font-size:.8rem"><?= e($l['tip']) ?></div><?php endif;?></td>
           <td><?= e($l['grad'] ?? '—') ?></td>
+          <td class="num"><?= novac($l['promet']) ?></td>
           <td><span class="badge badge--<?= $l['status']==='aktivan'?'ok':'danger' ?>"><?= e(ucfirst($l['status'])) ?></span></td>
-          <td><?= $l['pretplata_do'] ? datum($l['pretplata_do']) : '—' ?></td>
-          <td class="muted"><?= datum($l['created_at']) ?></td></tr>
+          <td><?= $l['pretplata_do'] ? (($istekla?'<span class="out">':'<span class="muted">').datum($l['pretplata_do']).'</span>') : '<span class="muted">—</span>' ?></td></tr>
       <?php endforeach; endif; ?>
       </tbody>
     </table></div>

@@ -32,7 +32,7 @@ $kasa_title = $kasa_title ?? 'POS';
   </div>
   <div class="kasa-top__right">
     <?php if ($pu): ?>
-      <span class="badge badge--teal"><?= e(trim($pu['ime'].' '.($pu['prezime']??''))) ?></span>
+      <a class="badge badge--teal" href="<?= url('kasa') ?>?lock=1" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px" title="Promeni radnika"><?= ico('user',13) ?> <?= e(trim($pu['ime'].' '.($pu['prezime']??''))) ?></a>
       <a class="btn btn--ghost btn--sm" href="<?= url('kasa') ?>?lock=1"><?= ico('lock',16) ?> Zaključaj</a>
     <?php endif; ?>
     <button class="iconbtn" onclick="var d=document.documentElement,k=d.getAttribute('data-theme')==='dark';if(k){d.removeAttribute('data-theme');localStorage.setItem('sank_theme','light')}else{d.setAttribute('data-theme','dark');localStorage.setItem('sank_theme','dark')}" title="Tema">
