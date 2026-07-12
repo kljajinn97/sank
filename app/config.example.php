@@ -14,7 +14,7 @@ return [
         'charset' => 'utf8mb4',
     ],
 
-    'app_name' => 'Sank',
+    'app_name' => 'Waiter',
 
     // Posle prvog super_admin naloga stavi false (ili obriši setup.php).
     'allow_setup' => true,

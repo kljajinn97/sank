@@ -6,7 +6,7 @@
 require_login();
 $u = current_user();
 $active = $active ?? '';
-$page_title = $page_title ?? 'Sank';
+$page_title = $page_title ?? 'Waiter';
 $initials = mb_strtoupper(mb_substr($u['ime'],0,1) . mb_substr($u['prezime'] ?? '',0,1));
 
 // Ikonice (inline SVG) po ključu
@@ -54,7 +54,7 @@ function nav_item(string $key, string $label, string $route, string $active): vo
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= e($page_title) ?> · Sank</title>
+<title><?= e($page_title) ?> · Waiter</title>
 <script>(function(){try{var t=localStorage.getItem('sank_theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}})();</script>
 <?php if (!is_super_admin() && !empty($u['lokal_boja'])): ?>
 <style>:root{--brand: <?= e($u['lokal_boja']) ?>;}</style>
@@ -69,11 +69,11 @@ function nav_item(string $key, string $label, string $route, string $active): vo
       <?php if (!is_super_admin() && !empty($u['lokal_logo'])): ?>
         <img class="sidebar__logo-img" src="<?= e($u['lokal_logo']) ?>" alt="logo">
       <?php else: ?>
-        <div class="sidebar__logo"><?= is_super_admin() ? 'S' : e(mb_strtoupper(mb_substr($u['lokal_naziv'] ?? 'S',0,1))) ?></div>
+        <div class="sidebar__logo"><?= is_super_admin() ? 'W' : e(mb_strtoupper(mb_substr($u['lokal_naziv'] ?? 'W',0,1))) ?></div>
       <?php endif; ?>
       <div>
-        <div class="sidebar__name"><?= is_super_admin() ? 'Sank' : e($u['lokal_naziv'] ?? 'Sank') ?></div>
-        <div class="sidebar__sub"><?= is_super_admin() ? 'Administracija' : 'Sank sistem' ?></div>
+        <div class="sidebar__name"><?= is_super_admin() ? 'Waiter' : e($u['lokal_naziv'] ?? 'Waiter') ?></div>
+        <div class="sidebar__sub"><?= is_super_admin() ? 'Administracija' : 'Waiter sistem' ?></div>
       </div>
     </div>
 

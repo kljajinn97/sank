@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($akcija === 'gen_kod') {
         do {
-            $kod = 'SANK-' . strtoupper(bin2hex(random_bytes(2))) . '-' . strtoupper(bin2hex(random_bytes(2)));
+            $kod = 'WTR-' . strtoupper(bin2hex(random_bytes(2))) . '-' . strtoupper(bin2hex(random_bytes(2)));
         } while (db_val('SELECT COUNT(*) FROM aktivacioni_kodovi WHERE kod=?', [$kod]) > 0);
         db_run('INSERT INTO aktivacioni_kodovi (lokal_id,kod,created_by) VALUES (?,?,?)', [$lid,$kod,$uid]);
         flash('success','Aktivacioni kod je generisan: '.$kod);

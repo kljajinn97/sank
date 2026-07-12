@@ -770,3 +770,135 @@ h3 { font-size: 1.05rem; }
   .stats { display: grid; }
   a { color: #000; text-decoration: none; }
 }
+
+/* ============================================================
+   WAITER PREMIUM 2.0 — optimizovane teme, dugmad, animacije
+   (override sloj — ide POSLE svih ranijih pravila)
+   ============================================================ */
+
+/* ---- Optimizovana SVETLA tema ---- */
+:root {
+  --bg: #f3f5f9;
+  --surface: #ffffff;
+  --surface-2: #f7f9fc;
+  --border: #e3e8ef;
+  --shadow-sm: 0 1px 2px rgba(16,24,40,.05), 0 1px 3px rgba(16,24,40,.04);
+  --shadow: 0 2px 4px rgba(16,24,40,.04), 0 10px 28px -8px rgba(16,24,40,.1);
+  --shadow-lg: 0 20px 50px -16px rgba(16,24,40,.22);
+}
+body {
+  background:
+    radial-gradient(900px 420px at 85% -10%, color-mix(in srgb, var(--brand) 7%, transparent), transparent 60%),
+    var(--bg);
+}
+
+/* ---- Optimizovana TAMNA tema ---- */
+:root[data-theme="dark"] {
+  --bg: #0a0f16;
+  --surface: #121a24;
+  --surface-2: #0d141d;
+  --border: #223041;
+  --text: #eef3f8;
+  --text-2: #a6b4c2;
+  --text-3: #5d6c7c;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
+  --shadow: 0 2px 6px rgba(0,0,0,.35), 0 14px 34px -12px rgba(0,0,0,.55);
+  --shadow-lg: 0 26px 60px -18px rgba(0,0,0,.75);
+  --brand-soft: color-mix(in srgb, var(--brand) 22%, #0d141d);
+  --ok-soft: rgba(22,163,74,.16);
+  --danger-soft: rgba(220,38,38,.16);
+  --warn-soft: rgba(217,119,6,.16);
+  --info-soft: rgba(37,99,235,.16);
+  --accent-soft: rgba(245,158,11,.16);
+}
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(900px 420px at 85% -10%, color-mix(in srgb, var(--brand) 10%, transparent), transparent 60%),
+    var(--bg);
+}
+:root[data-theme="dark"] .badge--ok { color:#4ade80; } 
+:root[data-theme="dark"] .badge--danger { color:#f87171; }
+:root[data-theme="dark"] .badge--warn { color:#fbbf24; }
+:root[data-theme="dark"] .badge--info { color:#60a5fa; }
+:root[data-theme="dark"] .badge--teal { color: color-mix(in srgb, var(--brand), #fff 45%); }
+:root[data-theme="dark"] .badge--muted { background:#1c2836; color:var(--text-2); }
+:root[data-theme="dark"] .flash--success { background:rgba(22,163,74,.14); color:#6ee7a0; }
+:root[data-theme="dark"] .flash--error { background:rgba(220,38,38,.14); color:#fca5a5; }
+:root[data-theme="dark"] .flash--info { background:rgba(37,99,235,.14); color:#93c5fd; }
+
+/* ---- Premium dugmad ---- */
+.btn {
+  border-radius: 12px;
+  transition: transform .14s cubic-bezier(.2,.8,.2,1), box-shadow .14s, background .14s, border-color .14s;
+  will-change: transform;
+}
+.btn--primary {
+  background: linear-gradient(140deg, color-mix(in srgb, var(--brand), #fff 10%), var(--brand) 45%, var(--brand-600));
+  box-shadow: 0 2px 5px -1px color-mix(in srgb, var(--brand) 55%, transparent),
+              0 10px 22px -8px color-mix(in srgb, var(--brand) 65%, transparent),
+              inset 0 1px 0 rgba(255,255,255,.22);
+}
+.btn--primary:hover { transform: translateY(-1.5px);
+  box-shadow: 0 4px 8px -2px color-mix(in srgb, var(--brand) 55%, transparent),
+              0 16px 30px -10px color-mix(in srgb, var(--brand) 70%, transparent),
+              inset 0 1px 0 rgba(255,255,255,.25); }
+.btn--primary:active { transform: translateY(0) scale(.98); }
+.btn--ghost:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); border-color: color-mix(in srgb, var(--brand) 35%, var(--border)); }
+.btn--ghost:active { transform: scale(.98); }
+.btn--danger { box-shadow: 0 8px 20px -8px rgba(220,38,38,.5), inset 0 1px 0 rgba(255,255,255,.18); }
+.btn:focus-visible, .input:focus-visible, .select:focus-visible, .iconbtn:focus-visible {
+  outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand) 30%, transparent);
+}
+
+/* ---- Ulazna animacija sadržaja ---- */
+@keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.content > * { animation: pageIn .34s cubic-bezier(.2,.8,.2,1) both; }
+.content > *:nth-child(2) { animation-delay: .04s; }
+.content > *:nth-child(3) { animation-delay: .08s; }
+.content > *:nth-child(4) { animation-delay: .12s; }
+.content > *:nth-child(n+5) { animation-delay: .16s; }
+.kasa-main > * { animation: pageIn .3s cubic-bezier(.2,.8,.2,1) both; }
+
+/* ---- Kartice i statovi ---- */
+.card { transition: box-shadow .18s, transform .18s; }
+.stat { transition: transform .16s, box-shadow .16s; }
+.stat:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+a.stat:hover { border-color: color-mix(in srgb, var(--brand) 30%, var(--border)); }
+
+/* ---- Sidebar fino ---- */
+.nav__item { border-radius: 11px; }
+.nav__item svg { transition: transform .15s; }
+.nav__item:hover svg { transform: scale(1.12); }
+.nav__item.is-active { box-shadow: inset 3px 0 0 var(--side-active), 0 4px 14px -6px color-mix(in srgb, var(--brand) 50%, transparent); }
+
+/* ---- Modali (dialog) animacija ---- */
+dialog.modal { opacity: 0; transform: translateY(14px) scale(.97); transition: opacity .2s, transform .2s; }
+dialog.modal[open] { opacity: 1; transform: none; animation: pageIn .26s cubic-bezier(.2,.8,.2,1); }
+dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3px); }
+:root[data-theme="dark"] dialog.modal { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+
+/* ---- Tabele ---- */
+.table tbody tr { transition: background .12s; }
+.table tbody tr:hover { background: color-mix(in srgb, var(--brand) 4%, var(--surface-2)); }
+
+/* ---- Inputi ---- */
+.input, .select { border-radius: 11px; transition: border-color .15s, box-shadow .15s, background .15s; }
+.input:hover, .select:hover { border-color: color-mix(in srgb, var(--brand) 25%, var(--border)); }
+
+/* ---- Scrollbar (WebKit) ---- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text-3) 40%, transparent); border-radius: 99px; border: 2.5px solid var(--bg); }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--brand) 55%, transparent); }
+
+/* ---- Selekcija teksta ---- */
+::selection { background: color-mix(in srgb, var(--brand) 28%, transparent); }
+
+/* ---- Toolbar tabovi fino ---- */
+.tabs a { transition: background .14s, color .14s, box-shadow .14s, transform .12s; }
+.tabs a:active { transform: scale(.97); }
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

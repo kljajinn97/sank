@@ -1,5 +1,5 @@
-// Sank POS — service worker (osnovno keširanje ljuske aplikacije)
-const CACHE = 'sank-pos-v1';
+// Waiter POS — service worker (osnovno keširanje ljuske aplikacije)
+const CACHE = 'waiter-pos-v2';
 const ASSETS = ['/assets/css/app.css', '/assets/icon.svg'];
 
 self.addEventListener('install', (e) => {

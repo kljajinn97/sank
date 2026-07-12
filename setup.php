@@ -71,14 +71,14 @@ catch (Throwable $e) { $db_err = $e->getMessage(); }
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Instalacija · Sank</title>
+<title>Instalacija · Waiter</title>
 <link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
 </head>
 <body style="background:var(--bg);">
 <div style="max-width:520px;margin:6vh auto;padding:20px;">
   <div style="display:flex;align-items:center;gap:14px;justify-content:center;margin-bottom:26px;">
-    <div class="sidebar__logo" style="width:46px;height:46px;font-size:24px;">S</div>
-    <div style="font-size:1.6rem;font-weight:800;">Sank — instalacija</div>
+    <div class="sidebar__logo" style="width:46px;height:46px;font-size:24px;">W</div>
+    <div style="font-size:1.6rem;font-weight:800;">Waiter — instalacija</div>
   </div>
 
   <div class="card"><div class="card__body">

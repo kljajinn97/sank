@@ -49,7 +49,7 @@ $active = '';
 require __DIR__ . '/../partials/layout_top.php';
 ?>
 <div class="page-head">
-  <div><h1>Dobrodošao u Sank</h1><p>Podesi svoj lokal za par minuta i kreni sa radom.</p></div>
+  <div><h1>Dobrodošao u Waiter</h1><p>Podesi svoj lokal za par minuta i kreni sa radom.</p></div>
 </div>
 
 <div class="card mb-2"><div class="card__body">

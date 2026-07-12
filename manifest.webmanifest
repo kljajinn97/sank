@@ -1,6 +1,6 @@
 {
-  "name": "Sank POS",
-  "short_name": "Sank POS",
+  "name": "Waiter POS",
+  "short_name": "Waiter POS",
   "description": "POS kasa za ugostiteljstvo",
   "start_url": "/kasa",
   "scope": "/",

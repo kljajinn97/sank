@@ -40,12 +40,12 @@ function safe_name(?string $s): string { return preg_replace('/[^a-zA-Z0-9_-]/',
 
 // ---------- SQL backup ----------
 if (($_GET['dump'] ?? '') === 'sql') {
-    $fn = 'sank-backup-'.safe_name($lokal['naziv']).'-'.date('Y-m-d').'.sql';
+    $fn = 'waiter-backup-'.safe_name($lokal['naziv']).'-'.date('Y-m-d').'.sql';
     header('Content-Type: application/sql; charset=utf-8');
     header('Content-Disposition: attachment; filename="'.$fn.'"');
     $pdo = db();
-    echo "-- Sank backup — lokal: ".$lokal['naziv']." (#$lid)\n-- Datum: ".date('Y-m-d H:i')."\n";
-    echo "-- Uvoz: import u bazu sa istom Sank šemom.\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n\n";
+    echo "-- Waiter backup — lokal: ".$lokal['naziv']." (#$lid)\n-- Datum: ".date('Y-m-d H:i')."\n";
+    echo "-- Uvoz: import u bazu sa istom Waiter šemom.\nSET NAMES utf8mb4;\nSET FOREIGN_KEY_CHECKS=0;\n\n";
     foreach ($TABELE as $t => $w) {
         $rows = $pdo->query("SELECT * FROM `$t` WHERE $w")->fetchAll();
         if (!$rows) continue;
@@ -66,7 +66,7 @@ if (($_GET['dump'] ?? '') === 'sql') {
 if (($_GET['dump'] ?? '') === 'csv') {
     $t = $_GET['t'] ?? '';
     if (!isset($CSV_TABELE[$t])) { flash('error','Nepoznata tabela.'); redirect(url('backup')); }
-    $fn = 'sank-'.$t.'-'.date('Y-m-d').'.csv';
+    $fn = 'waiter-'.$t.'-'.date('Y-m-d').'.csv';
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="'.$fn.'"');
     echo "\xEF\xBB\xBF"; // BOM za Excel

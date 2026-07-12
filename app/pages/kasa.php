@@ -64,12 +64,12 @@ require __DIR__ . '/../partials/kasa_top.php';
 <?php $lok = $device ? db_row('SELECT naziv,logo FROM lokali WHERE id=?', [$device['lokal_id']]) : null; ?>
 <?php if (!$device): ?>
   <div class="kasa-center"><div class="kasa-box">
-    <div class="sidebar__logo" style="width:64px;height:64px;font-size:30px;margin:0 auto 18px">S</div>
+    <div class="sidebar__logo" style="width:64px;height:64px;font-size:30px;margin:0 auto 18px">W</div>
     <h2>Aktivacija POS uređaja</h2>
     <p class="muted" style="margin-bottom:24px">Unesi aktivacioni kod koji si dobio od administratora. Uređaj se vezuje za tvoj lokal.</p>
     <form method="post" action="<?= url('kasa') ?>">
       <?= csrf_field() ?><input type="hidden" name="akcija" value="activate">
-      <input class="input" name="kod" placeholder="npr. SANK-4F2A-9C1B" required autofocus
+      <input class="input" name="kod" placeholder="npr. WTR-4F2A-9C1B" required autofocus
              style="text-align:center;font-size:1.2rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px">
       <button class="btn btn--primary btn--block">Aktiviraj uređaj</button>
     </form>
@@ -79,14 +79,14 @@ require __DIR__ . '/../partials/kasa_top.php';
     <div class="pin-hero">
       <div class="pin-hero__top">
         <?php if(!empty($lok['logo'])): ?><img class="pin-hero__logo" src="<?= e($lok['logo']) ?>" alt="">
-        <?php else: ?><div class="pin-hero__logo"><?= e(mb_strtoupper(mb_substr($lok['naziv'] ?? 'S',0,1))) ?></div><?php endif; ?>
-        <div class="pin-hero__name"><?= e($lok['naziv'] ?? 'Sank POS') ?></div>
+        <?php else: ?><div class="pin-hero__logo"><?= e(mb_strtoupper(mb_substr($lok['naziv'] ?? 'W',0,1))) ?></div><?php endif; ?>
+        <div class="pin-hero__name"><?= e($lok['naziv'] ?? 'Waiter POS') ?></div>
       </div>
       <div class="pin-hero__mid">
         <div class="pin-clock" id="clock">--:--</div>
         <div class="pin-date" id="cdate"></div>
       </div>
-      <div class="pin-hero__foot">Sank POS terminal · dobrodošli</div>
+      <div class="pin-hero__foot">Waiter POS terminal · dobrodošli</div>
     </div>
     <div class="pin-side">
       <div class="pin-side__box">

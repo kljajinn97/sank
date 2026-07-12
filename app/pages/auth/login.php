@@ -21,14 +21,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prijava · Sank</title>
+<title>Prijava · Waiter</title>
 <link rel="stylesheet" href="<?= asset('assets/css/app.css') ?>">
 </head>
 <body>
 <div class="auth">
   <aside class="auth__aside">
     <div class="auth__brand">
-      <div class="sidebar__logo">S</div> Sank
+      <div class="sidebar__logo">W</div> Waiter
     </div>
     <div class="auth__pitch">
       <h1>Digitalna knjiga šanka</h1>
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="auth__feature"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Jasni izveštaji za vlasnika</div>
       </div>
     </div>
-    <div style="color:rgba(255,255,255,.6);font-size:.82rem;">© <?= date('Y') ?> Sank — sve za tvoj šank.</div>
+    <div style="color:rgba(255,255,255,.6);font-size:.82rem;">© <?= date('Y') ?> Waiter — sve za tvoj šank.</div>
   </aside>
 
   <div class="auth__main">

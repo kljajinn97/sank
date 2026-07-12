@@ -25,7 +25,7 @@ if ($dostupno) {
 <body style="background:var(--bg)">
 <?php if (!$dostupno): ?>
   <div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:24px">
-    <div><div class="sidebar__logo" style="width:56px;height:56px;font-size:26px;margin:0 auto 14px">S</div>
+    <div><div class="sidebar__logo" style="width:56px;height:56px;font-size:26px;margin:0 auto 14px">W</div>
       <h2>Meni trenutno nije dostupan</h2><p class="muted">Obrati se osoblju.</p></div>
   </div>
 <?php else: ?>
@@ -72,7 +72,7 @@ if ($dostupno) {
       <?php endif; ?>
     <?php endif; ?>
 
-    <footer class="meni__foot">Digitalni meni · <strong>Sank</strong></footer>
+    <footer class="meni__foot">Digitalni meni · <strong>Waiter</strong></footer>
   </div>
 <?php endif; ?>
 </body>
