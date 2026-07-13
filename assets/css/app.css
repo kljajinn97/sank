@@ -989,17 +989,17 @@ dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3p
   background: url('/img/pos_bg.png') center/cover no-repeat #15100c;
 }
 .pin-lock__col {
-  position: absolute; left: clamp(24px, 5vw, 90px); top: 30vh;
+  position: absolute; left: 33vw; top: 28vh; transform: translateX(-50%);
   width: min(330px, 86vw);
   display: flex; flex-direction: column; gap: 20px;
 }
 .pin-lock__clock {
   font-size: clamp(3rem, 6vw, 4.6rem); font-weight: 900; letter-spacing: -.03em;
   line-height: 1; color: #fff; font-variant-numeric: tabular-nums;
-  text-shadow: 0 4px 28px rgba(0,0,0,.65);
+  text-shadow: 0 4px 28px rgba(0,0,0,.65); text-align: center;
 }
-.pin-lock__date { color: rgba(255,255,255,.82); font-size: 1.05rem; margin-top: 6px; text-transform: capitalize; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
-.pin-dots--left { justify-content: flex-start; margin: 0; }
+.pin-lock__date { color: rgba(255,255,255,.82); font-size: 1.05rem; margin-top: 6px; text-transform: capitalize; text-shadow: 0 2px 12px rgba(0,0,0,.6); text-align: center; }
+.pin-dots--left { justify-content: center; margin: 0; }
 .pin-dots--left i { background: rgba(255,255,255,.28); box-shadow: none; }
 .pin-dots--left i.on { background: #fff; box-shadow: 0 0 14px rgba(255,255,255,.55); }
 .pinpad--glass button {
