@@ -983,6 +983,41 @@ dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3p
 /* Sidebar — Waiter full logo za administraciju */
 .sidebar__brandimg { height: 30px; width: auto; display: block; }
 
+/* ---- POS LOCK — čist full screen (samo bg + sat + pinpad levo) ---- */
+.pin-lock {
+  position: fixed; inset: 0; z-index: 60;
+  background: url('/img/pos_bg.png') center/cover no-repeat #15100c;
+}
+.pin-lock__col {
+  position: absolute; left: clamp(24px, 5vw, 90px); top: 30vh;
+  width: min(330px, 86vw);
+  display: flex; flex-direction: column; gap: 20px;
+}
+.pin-lock__clock {
+  font-size: clamp(3rem, 6vw, 4.6rem); font-weight: 900; letter-spacing: -.03em;
+  line-height: 1; color: #fff; font-variant-numeric: tabular-nums;
+  text-shadow: 0 4px 28px rgba(0,0,0,.65);
+}
+.pin-lock__date { color: rgba(255,255,255,.82); font-size: 1.05rem; margin-top: 6px; text-transform: capitalize; text-shadow: 0 2px 12px rgba(0,0,0,.6); }
+.pin-dots--left { justify-content: flex-start; margin: 0; }
+.pin-dots--left i { background: rgba(255,255,255,.28); box-shadow: none; }
+.pin-dots--left i.on { background: #fff; box-shadow: 0 0 14px rgba(255,255,255,.55); }
+.pinpad--glass button {
+  background: rgba(255,255,255,.09);
+  border: 1px solid rgba(255,255,255,.18);
+  color: #fff; height: 64px; font-size: 1.45rem;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 20px -10px rgba(0,0,0,.6);
+}
+.pinpad--glass button:hover { background: rgba(255,255,255,.16); }
+.pinpad--glass button:active { transform: scale(.93); background: color-mix(in srgb, var(--brand) 55%, rgba(255,255,255,.15)); color: #fff; }
+@media (max-width: 700px) {
+  .pin-lock { background-position: 30% center; }
+  .pin-lock__col { top: 24vh; left: 50%; transform: translateX(-50%); align-items: center; }
+  .pin-lock__clock { text-align: center; }
+  .pin-dots--left { justify-content: center; }
+}
+
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

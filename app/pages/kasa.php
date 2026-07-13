@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($device && pos_current_user()) redirect(url('pos'));
 
 $kasa_title = 'Prijava';
+$kasa_hide_top = ($device !== null);   // lock ekran = čist full screen, bez top bara
 require __DIR__ . '/../partials/kasa_top.php';
 ?>
 <?php $lok = $device ? db_row('SELECT naziv,logo FROM lokali WHERE id=?', [$device['lokal_id']]) : null; ?>
@@ -76,33 +77,19 @@ require __DIR__ . '/../partials/kasa_top.php';
     </form>
   </div></div>
 <?php else: ?>
-  <div class="pin-screen">
-    <div class="pin-hero">
-      <div class="pin-hero__top">
-        <span class="pin-hero__lokal">
-          <?php if(!empty($lok['logo'])): ?><img src="<?= e($lok['logo']) ?>" alt=""><?php endif; ?>
-          <?= e($lok['naziv'] ?? 'Waiter POS') ?>
-        </span>
+  <div class="pin-lock">
+    <div class="pin-lock__col">
+      <div>
+        <div class="pin-lock__clock" id="clock">--:--</div>
+        <div class="pin-lock__date" id="cdate"></div>
       </div>
-      <div class="pin-hero__mid">
-        <div class="pin-clock" id="clock">--:--</div>
-        <div class="pin-date" id="cdate"></div>
-      </div>
-      <div class="pin-hero__foot">Waiter POS terminal · dobrodošli</div>
-    </div>
-    <div class="pin-side">
-      <div class="pin-side__box">
-        <div class="sidebar__logo" style="width:52px;height:52px;margin:0 auto 12px"><?= ico('lock',24) ?></div>
-        <h2>Unesi PIN</h2>
-        <p class="muted">Prijavi se svojim PIN-om.</p>
-        <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
-        <form method="post" action="<?= url('kasa') ?>" id="pinForm"><?= csrf_field() ?><input type="hidden" name="akcija" value="pin"><input type="hidden" name="pin" id="pinVal"></form>
-        <div class="pinpad">
-          <?php foreach ([1,2,3,4,5,6,7,8,9] as $n): ?><button onclick="pinPush('<?= $n ?>')"><?= $n ?></button><?php endforeach; ?>
-          <button class="wide" onclick="pinClear()">C</button>
-          <button onclick="pinPush('0')">0</button>
-          <button class="wide" onclick="pinBack()">⌫</button>
-        </div>
+      <div class="pin-dots pin-dots--left" id="pinDots"><i></i><i></i><i></i><i></i></div>
+      <form method="post" action="<?= url('kasa') ?>" id="pinForm"><?= csrf_field() ?><input type="hidden" name="akcija" value="pin"><input type="hidden" name="pin" id="pinVal"></form>
+      <div class="pinpad pinpad--glass">
+        <?php foreach ([1,2,3,4,5,6,7,8,9] as $n): ?><button onclick="pinPush('<?= $n ?>')"><?= $n ?></button><?php endforeach; ?>
+        <button class="wide" onclick="pinClear()">C</button>
+        <button onclick="pinPush('0')">0</button>
+        <button class="wide" onclick="pinBack()">⌫</button>
       </div>
     </div>
   </div>

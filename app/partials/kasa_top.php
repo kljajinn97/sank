@@ -24,6 +24,7 @@ $kasa_title = $kasa_title ?? 'POS';
 <script src="<?= asset('assets/js/ui.js') ?>"></script>
 </head>
 <body class="kasa-body">
+<?php if (empty($kasa_hide_top)): ?>
 <header class="kasa-top">
   <div class="kasa-top__brand">
     <div class="sidebar__logo" style="width:34px;height:34px;font-size:17px"><?= e(mb_strtoupper(mb_substr($lok['naziv'] ?? 'S',0,1))) ?></div>
@@ -42,6 +43,7 @@ $kasa_title = $kasa_title ?? 'POS';
     </button>
   </div>
 </header>
+<?php endif; ?>
 <script>
 (function(){
   var dani=['Nedelja','Ponedeljak','Utorak','Sreda','Četvrtak','Petak','Subota'];
