@@ -1018,6 +1018,11 @@ dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3p
   .pin-dots--left { justify-content: center; }
 }
 
+/* ---- Offline indikator ---- */
+.net-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px color-mix(in srgb, var(--ok) 60%, transparent); }
+.net-dot.off { background: var(--danger); box-shadow: 0 0 8px rgba(220,38,38,.6); animation: netBlink 1.2s infinite; }
+@keyframes netBlink { 50% { opacity: .35; } }
+
 /* ---- Reduced motion ---- */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

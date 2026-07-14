@@ -22,6 +22,7 @@ $kasa_title = $kasa_title ?? 'POS';
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
 <script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
 <script src="<?= asset('assets/js/ui.js') ?>"></script>
+<script src="<?= asset('assets/js/offline.js') ?>"></script>
 </head>
 <body class="kasa-body">
 <?php if (empty($kasa_hide_top)): ?>
@@ -32,6 +33,8 @@ $kasa_title = $kasa_title ?? 'POS';
       <div style="font-size:.72rem;color:var(--text-3)">POS terminal</div></div>
   </div>
   <div class="kasa-top__right">
+    <span class="net-dot" id="netDot" title="Mreža"></span>
+    <a class="badge badge--warn" id="netQueue" href="<?= url('offline-pos') ?>" style="display:none;text-decoration:none" title="Offline računi na čekanju">0</a>
     <span class="kasa-clock" id="topClock">--:--</span>
     <?php if ($pu): ?>
       <a class="badge badge--teal" href="<?= url('kasa') ?>?lock=1" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px" title="Promeni radnika"><?= ico('user',13) ?> <?= e(trim($pu['ime'].' '.($pu['prezime']??''))) ?></a>

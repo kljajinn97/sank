@@ -515,11 +515,18 @@ if ($rid) {
       setTimeout(refreshCart,700);
     }
     async function api(akcija,extra){
-      const body=new URLSearchParams(Object.assign({akcija,ajax:1,racun_id:RID,_csrf:CSRF},extra||{}));
-      const res=await fetch('<?= url('pos') ?>',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
-      return res.json();
+      try{
+        const body=new URLSearchParams(Object.assign({akcija,ajax:1,racun_id:RID,_csrf:CSRF},extra||{}));
+        const res=await fetch('<?= url('pos') ?>',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+        if(!res.ok) throw 0;
+        return res.json();
+      }catch(e){
+        SankUI.confirm('Nema veze sa serverom. Predji na offline kasu — racuni ce se sinhronizovati kad se mreza vrati.',{title:'Nema mreze',ok:'Offline kasa'}).then(function(ok){ if(ok) location='<?= url('offline-pos') ?>'; });
+        return null;
+      }
     }
     function render(d){
+      if(!d) return;
       window.CART=d;
       const box=document.getElementById('cartItems');
       if(!d.stavke.length){box.innerHTML='<div class="empty" style="padding:30px 10px">Dodaj proizvode dodirom →</div>';}

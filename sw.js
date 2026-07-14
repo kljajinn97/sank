@@ -1,9 +1,17 @@
-// Waiter POS — service worker (osnovno keširanje ljuske aplikacije)
-const CACHE = 'waiter-pos-v2';
-const ASSETS = ['/assets/css/app.css', '/assets/icon.svg'];
+// Waiter POS — service worker: offline režim (keš ljuske + fallback na offline kasu)
+const CACHE = 'waiter-pos-v3';
+const PRECACHE = [
+  '/offline-pos',
+  '/assets/css/app.css',
+  '/assets/js/ui.js',
+  '/assets/js/offline.js',
+  '/assets/icon.svg',
+  '/img/w_logo_color.png',
+  '/img/w_logo_white.png',
+];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(PRECACHE)));
   self.skipWaiting();
 });
 
@@ -16,13 +24,34 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET') return; // POST/AJAX ne diramo
+  if (req.method !== 'GET') return;                       // POST/AJAX ne diramo
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;             // samo naš domen
 
-  // Statički resursi: prvo keš, pa mreža
-  if (ASSETS.some((a) => req.url.endsWith(a))) {
-    e.respondWith(caches.match(req).then((r) => r || fetch(req)));
+  // Navigacije (stranice): mreža prvo → keš → offline kasa
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req).catch(() =>
+        caches.match(req, { ignoreSearch: true }).then((r) => r || caches.match('/offline-pos'))
+      )
+    );
     return;
   }
-  // Ostalo (stranice, podaci): prvo mreža, pa keš kao rezerva
-  e.respondWith(fetch(req).catch(() => caches.match(req)));
+
+  // Statika (css/js/slike): keš prvo, pa mreža (uz dopunu keša)
+  if (/\.(css|js|svg|png|jpg|jpeg|ico)$/.test(url.pathname) || url.pathname === '/manifest.webmanifest') {
+    e.respondWith(
+      caches.match(req, { ignoreSearch: true }).then((hit) => {
+        const net = fetch(req).then((res) => {
+          if (res && res.ok) caches.open(CACHE).then((c) => c.put(req, res.clone()));
+          return res;
+        }).catch(() => hit);
+        return hit || net;
+      })
+    );
+    return;
+  }
+
+  // Ostalo (JSON i sl.): mreža, pa keš kao rezerva
+  e.respondWith(fetch(req).catch(() => caches.match(req, { ignoreSearch: true })));
 });
