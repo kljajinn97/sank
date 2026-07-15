@@ -58,6 +58,12 @@ $kasa_title = $kasa_title ?? 'POS';
     var cd=document.getElementById('cdate'); if(cd) cd.textContent=dani[d.getDay()]+', '+p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+'.';
   }
   tick(); setInterval(tick,1000);
+  // Skriveni servisni ulaz: 5 brzih tapova na sat (gornji ili lock ekran)
+  var taps=0, tt=0;
+  function servisTap(){ var n=Date.now(); if(n-tt>2500) taps=0; tt=n; if(++taps>=5){ taps=0; location='<?= url('kasa-servis') ?>'; } }
+  document.addEventListener('DOMContentLoaded',function(){
+    ['topClock','clock'].forEach(function(id){ var el=document.getElementById(id); if(el) el.addEventListener('click',servisTap); });
+  });
 })();
 </script>
 <main class="kasa-main">

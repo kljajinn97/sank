@@ -30,6 +30,7 @@ $routes = [
     'kds'        => 'kds.php',
     'possync'    => 'possync.php',
     'offline-pos'=> 'offline.php',
+    'kasa-servis'=> 'servis.php',
     'uredjaji'   => 'uredjaji.php',
     'qrmeni'     => 'qrmeni.php',
 

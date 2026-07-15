@@ -13,6 +13,8 @@ $RADNJE = [
   'uklonjena_stavka'=> ['Uklonjena stavka','warn'],
   'status'          => ['Promena statusa','info'],
   'zatvaranje_dana' => ['Zatvaranje dana','info'],
+  'servis_pristup'  => ['Servis pristup','info'],
+  'servis_deaktivacija' => ['Servis deaktivacija','danger'],
 ];
 
 function urlq(string $path, array $q): string { return url($path) . (($qs=http_build_query($q))?'?'.$qs:''); }

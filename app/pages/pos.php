@@ -268,8 +268,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     flash('error','Fiskalizacija nije uspela — proveri PFR/podešavanja.');
             }
         } catch (Throwable $e) { $pdo->rollBack(); flash('error','Greška: '.$e->getMessage()); }
-        // Auto-štampa računa posle naplate (Chrome kiosk-printing štampa bez dijaloga)
-        $autoStampa = (int)(db_val('SELECT auto_stampa FROM lokali WHERE id=?', [$lid]) ?: 0);
+        // Auto-štampa računa posle naplate — podešavanje uređaja (servis) ima prednost nad lokalom
+        $asDev = pos_current_device()['auto_stampa'] ?? null;
+        $autoStampa = $asDev !== null ? (int)$asDev : (int)(db_val('SELECT auto_stampa FROM lokali WHERE id=?', [$lid]) ?: 0);
         redirect(url('pos') . ($autoStampa ? '?stampaj='.$rid : ''));
     }
 
@@ -289,6 +290,13 @@ if ($rid && isset($_GET['nazad'])) {
     redirect(url('pos'));
 }
 
+// Podešavanja štampača ovog uređaja (servisni ekran) — utiču na SVE štampe
+$pdev = pos_current_device();
+$PAP = ($pdev['papir'] ?? '80') === '58' ? 58 : 80;
+$FS  = ($pdev['font_vel'] ?? 'normal') === 'veliki' ? 15 : 13;
+$KOP = max(1, min(3, (int)($pdev['stampa_kopije'] ?? 1)));
+$PRINT_JS = '<script>var K='.$KOP.';function go(){window.print();}window.onafterprint=function(){if(--K>0)setTimeout(go,300);else setTimeout(function(){window.close()},300);};window.onload=go;</script>';
+
 // Nalog za pripremu (kuhinja/šank) — štampa nove stavke i markira poslato
 if ($rid && !empty($_GET['kuhinja'])) {
     $rr = db_row('SELECT r.*, s.naziv AS sto FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id WHERE r.id=? AND r.lokal_id=?', [$rid,$lid]);
@@ -297,13 +305,13 @@ if ($rid && !empty($_GET['kuhinja'])) {
         if ($nove) db_run('UPDATE racun_stavke SET poslato=1, poslato_at=NOW() WHERE racun_id=? AND poslato=0', [$rid]);
         ?><!DOCTYPE html><html lang="sr"><head><meta charset="utf-8"><title>Nalog #<?= $rid ?></title>
         <style>*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-          body{width:80mm;margin:0 auto;padding:10px;color:#000}
+          body{width:<?= $PAP ?>mm;margin:0 auto;padding:10px;color:#000}
           .c{text-align:center}.b{font-weight:800}hr{border:none;border-top:2px dashed #000;margin:8px 0}
           .big{font-size:20px;font-weight:800;margin:6px 0}
           .it{font-size:19px;font-weight:800;padding:6px 0;border-bottom:1px solid #ccc}
           .nap{font-size:14px;font-weight:600;color:#333;padding-left:10px}
           @media print{@page{margin:4mm}}</style></head>
-        <body onload="window.print()" onafterprint="setTimeout(function(){window.close()},300)">
+        <body><?= $PRINT_JS ?>
           <div class="c b" style="font-size:16px">PRIPREMA</div>
           <div class="c big"><?= e($rr['sto'] ?: 'Šank') ?></div>
           <div class="c">Račun #<?= $rid ?> · <?= date('d.m. H:i') ?></div>
@@ -331,13 +339,13 @@ if ($rid && !empty($_GET['stampa'])) {
         ?><!DOCTYPE html><html lang="sr"><head><meta charset="utf-8"><title>Račun #<?= $rid ?></title>
         <style>
           *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
-          body{width:80mm;margin:0 auto;padding:10px;color:#000;font-size:13px}
+          body{width:<?= $PAP ?>mm;margin:0 auto;padding:10px;color:#000;font-size:<?= $FS ?>px}
           .c{text-align:center}.b{font-weight:700}.r{text-align:right}
           h2{font-size:17px}hr{border:none;border-top:1px dashed #999;margin:8px 0}
           table{width:100%;border-collapse:collapse}td{padding:2px 0;vertical-align:top}
           .tot{font-size:16px;font-weight:800}
           @media print{@page{margin:4mm}}
-        </style></head><body onload="window.print()" onafterprint="setTimeout(function(){window.close()},300)">
+        </style></head><body><?= $PRINT_JS ?>
           <div class="c"><h2><?= e($lok['naziv']) ?></h2>
             <?php if($lok['adresa']||$lok['grad']):?><div><?= e(trim(($lok['adresa']??'').' '.($lok['grad']??''))) ?></div><?php endif;?>
             <?php if($lok['pib']):?><div>PIB: <?= e($lok['pib']) ?></div><?php endif;?></div>
