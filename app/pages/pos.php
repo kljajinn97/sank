@@ -98,13 +98,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($akcija === 'add_item' && $r) {
         $art = db_row('SELECT * FROM artikli WHERE id=? AND lokal_id=?', [(int)$_POST['artikal_id'],$lid]);
         if ($art) {
-            $post = db_row('SELECT * FROM racun_stavke WHERE racun_id=? AND artikal_id=? ORDER BY id DESC LIMIT 1', [$rid,$art['id']]);
-            if ($post) {
-                $nova = (float)$post['kolicina'] + 1;
-                db_run('UPDATE racun_stavke SET kolicina=?, iznos=? WHERE id=?', [$nova, round($nova*(float)$post['cena'],2), $post['id']]);
+            // Modifikatori (doplate) — cene se čitaju iz baze, ne veruje se klijentu
+            $modIds = array_values(array_filter(array_map('intval', explode(',', (string)($_POST['mods'] ?? '')))));
+            if ($modIds) {
+                $in = implode(',', array_fill(0, count($modIds), '?'));
+                $mods = db_all("SELECT * FROM modifikatori WHERE id IN ($in) AND artikal_id=? AND lokal_id=? AND aktivan=1",
+                               array_merge($modIds, [(int)$art['id'], $lid]));
+                $cena = (float)$art['prodajna_cena'];
+                $imena = [];
+                foreach ($mods as $m) { $cena += (float)$m['cena']; $imena[] = $m['naziv']; }
+                db_run('INSERT INTO racun_stavke (racun_id,artikal_id,naziv,cena,kolicina,iznos,napomena) VALUES (?,?,?,?,1,?,?)',
+                       [$rid,$art['id'],$art['naziv'],round($cena,2),round($cena,2), $imena ? implode(', ', $imena) : null]);
             } else {
-                db_run('INSERT INTO racun_stavke (racun_id,artikal_id,naziv,cena,kolicina,iznos) VALUES (?,?,?,?,1,?)',
-                       [$rid,$art['id'],$art['naziv'],$art['prodajna_cena'],$art['prodajna_cena']]);
+                $post = db_row('SELECT * FROM racun_stavke WHERE racun_id=? AND artikal_id=? AND napomena IS NULL ORDER BY id DESC LIMIT 1', [$rid,$art['id']]);
+                if ($post) {
+                    $nova = (float)$post['kolicina'] + 1;
+                    db_run('UPDATE racun_stavke SET kolicina=?, iznos=? WHERE id=?', [$nova, round($nova*(float)$post['cena'],2), $post['id']]);
+                } else {
+                    db_run('INSERT INTO racun_stavke (racun_id,artikal_id,naziv,cena,kolicina,iznos) VALUES (?,?,?,?,1,?)',
+                           [$rid,$art['id'],$art['naziv'],$art['prodajna_cena'],$art['prodajna_cena']]);
+                }
             }
         }
         if ($ajax) racun_json($rid,$lid); redirect(url('pos').'?racun='.$rid);
@@ -399,6 +412,9 @@ if ($rid) {
     $stoNaziv = $r['sto_id'] ? db_val('SELECT naziv FROM stolovi WHERE id=?', [$r['sto_id']]) : 'Šank / brza prodaja';
     $kategorije = db_all('SELECT * FROM kategorije WHERE lokal_id=? ORDER BY naziv', [$lid]);
     $artikli = db_all('SELECT * FROM artikli WHERE lokal_id=? AND aktivan=1 ORDER BY naziv', [$lid]);
+    $posModMap = [];
+    foreach (db_all('SELECT id,artikal_id,naziv,cena FROM modifikatori WHERE lokal_id=? AND aktivan=1 ORDER BY naziv', [$lid]) as $pm)
+        $posModMap[(int)$pm['artikal_id']][] = ['id'=>(int)$pm['id'],'naziv'=>$pm['naziv'],'cena'=>(float)$pm['cena']];
     $freeTables = db_all('SELECT s.* FROM stolovi s WHERE s.lokal_id=? AND s.id NOT IN
                           (SELECT sto_id FROM racuni WHERE lokal_id=? AND status="otvoren" AND sto_id IS NOT NULL) ORDER BY s.naziv', [$lid,$lid]);
     $openOther = db_all('SELECT r.id, COALESCE(s.naziv,"Šank") AS naziv, r.ukupno FROM racuni r
@@ -567,7 +583,32 @@ if ($rid) {
       var sub=document.getElementById('cartSub'); if(sub) sub.textContent=fmt(d.sub);
       document.getElementById('popustInp').value=Math.round(d.popust);
     }
-    async function addItem(id){render(await api('add_item',{artikal_id:id}));}
+    const POSMODS = <?= json_encode($posModMap, JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
+    async function addItem(id){
+      var mods = POSMODS[id];
+      if (mods && mods.length) { openModPick(id, mods); return; }
+      render(await api('add_item',{artikal_id:id}));
+    }
+    function openModPick(aid, mods){
+      var o=document.createElement('div'); o.className='uk-overlay';
+      var d=document.createElement('div'); d.className='uk-dialog'; d.style.textAlign='left';
+      d.innerHTML='<h3 class="uk-dialog__title" style="text-align:center">Doplate</h3>'
+        + mods.map(function(m){ return '<label class="flex items-center gap-2" style="padding:9px 10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer">'
+            +'<input type="checkbox" value="'+m.id+'"><span style="flex:1;font-weight:600">'+esc(m.naziv)+'</span>'
+            +'<span class="badge badge--teal">+'+fmt(m.cena)+'</span></label>'; }).join('')
+        +'<div class="uk-dialog__actions" style="margin-top:14px">'
+        +'<button type="button" class="btn btn--ghost" data-plain>Bez doplata</button>'
+        +'<button type="button" class="btn btn--primary" data-add>Dodaj</button></div>';
+      o.appendChild(d); document.body.appendChild(o);
+      requestAnimationFrame(function(){ o.classList.add('in'); d.classList.add('in'); });
+      function shut(){ o.classList.remove('in'); setTimeout(function(){o.remove();},200); }
+      d.querySelector('[data-plain]').onclick=async function(){ shut(); render(await api('add_item',{artikal_id:aid})); };
+      d.querySelector('[data-add]').onclick=async function(){
+        var ids=[].slice.call(d.querySelectorAll('input:checked')).map(function(c){return c.value;});
+        shut(); render(await api('add_item',{artikal_id:aid, mods:ids.join(',')}));
+      };
+      o.addEventListener('click',function(e){ if(e.target===o) shut(); });
+    }
     async function setQty(sid,kol){render(await api('set_qty',{stavka_id:sid,kolicina:kol}));}
     async function setPopust(p){render(await api('popust',{popust_pct:p}));}
     function filterCat(cat,el){

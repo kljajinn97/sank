@@ -230,15 +230,22 @@ function require_role(array $roles): void
     }
 }
 
-/** Prijava po username-u i lozinci */
+/** Prijava po username-u i lozinci (sa brute-force zaštitom: 5 pokušaja → 5 min) */
 function attempt_login(string $username, string $password): bool
 {
     $st = db()->prepare('SELECT * FROM korisnici WHERE username = ? AND status = "aktivan" LIMIT 1');
     $st->execute([$username]);
     $u = $st->fetch();
-    if (!$u || !password_verify($password, $u['password_hash'])) {
+    if (!$u) return false;
+    if (!empty($u['lock_until']) && strtotime($u['lock_until']) > time()) return false;
+    if (!password_verify($password, $u['password_hash'])) {
+        $fails = (int)($u['fail_count'] ?? 0) + 1;
+        if ($fails >= 5) db_run('UPDATE korisnici SET fail_count=0, lock_until=DATE_ADD(NOW(), INTERVAL 5 MINUTE) WHERE id=?', [$u['id']]);
+        else db_run('UPDATE korisnici SET fail_count=? WHERE id=?', [$fails, $u['id']]);
         return false;
     }
+    if ((int)($u['fail_count'] ?? 0) > 0 || !empty($u['lock_until']))
+        db_run('UPDATE korisnici SET fail_count=0, lock_until=NULL WHERE id=?', [$u['id']]);
     // Suspendovan lokal ne može da se prijavi (osim super_admina)
     if ($u['uloga'] !== 'super_admin' && $u['lokal_id']) {
         $ls = db()->prepare('SELECT status FROM lokali WHERE id = ?');

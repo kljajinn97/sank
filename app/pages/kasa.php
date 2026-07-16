@@ -33,12 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirect(url('kasa'));
     }
 
-    // --- PIN prijava radnika ---
+    // --- PIN prijava radnika (5 pogrešnih → pauza 60s) ---
     if ($akcija === 'pin' && $device) {
+        if (!empty($_SESSION['pin_lock']) && $_SESSION['pin_lock'] > time()) {
+            flash('error','Previše pogrešnih pokušaja — sačekaj minut.');
+            redirect(url('kasa'));
+        }
         $pin = trim($_POST['pin'] ?? '');
         $kandidati = db_all('SELECT * FROM korisnici WHERE lokal_id=? AND status="aktivan" AND pin IS NOT NULL', [$device['lokal_id']]);
         $ulogovan = null;
         foreach ($kandidati as $k) { if (password_verify($pin, $k['pin'])) { $ulogovan = $k; break; } }
+        if (!$ulogovan) {
+            $_SESSION['pin_fails'] = (int)($_SESSION['pin_fails'] ?? 0) + 1;
+            if ($_SESSION['pin_fails'] >= 5) { $_SESSION['pin_lock'] = time() + 60; $_SESSION['pin_fails'] = 0; }
+        } else { unset($_SESSION['pin_fails'], $_SESSION['pin_lock']); }
         if ($ulogovan) {
             $_SESSION['pos_uid'] = (int)$ulogovan['id'];
             $_SESSION['pos_lokal'] = (int)$device['lokal_id'];

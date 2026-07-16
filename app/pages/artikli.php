@@ -64,6 +64,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $mozeMenjati) {
         flash('success','Artikal je obrisan.');
         redirect(url('artikli'));
     }
+
+    if ($akcija === 'mod_dodaj') {
+        $aid = (int)($_POST['artikal_id'] ?? 0);
+        $naziv = post('naziv');
+        if ($naziv !== '' && db_val('SELECT id FROM artikli WHERE id=? AND lokal_id=?', [$aid,$lid])) {
+            db_run('INSERT INTO modifikatori (lokal_id,artikal_id,naziv,cena) VALUES (?,?,?,?)',
+                   [$lid,$aid,$naziv,to_num($_POST['cena'] ?? 0)]);
+            flash('success','Modifikator je dodat.');
+        }
+        redirect(url('artikli').'?prikaz=tabela');
+    }
+    if ($akcija === 'mod_obrisi') {
+        db_run('DELETE FROM modifikatori WHERE id=? AND lokal_id=?', [(int)$_POST['id'],$lid]);
+        flash('success','Modifikator je obrisan.');
+        redirect(url('artikli').'?prikaz=tabela');
+    }
 }
 
 // ---- Podaci ----
@@ -79,6 +95,11 @@ if ($fkat) { $sql .= ' AND a.kategorija_id=?'; $par[] = $fkat; }
 if ($pretraga !== '') { $sql .= ' AND a.naziv LIKE ?'; $par[] = '%'.$pretraga.'%'; }
 $sql .= ' ORDER BY a.aktivan DESC, a.naziv';
 $artikli = db_all($sql, $par);
+
+// Modifikatori grupisani po artiklu (za modal)
+$modMap = [];
+foreach (db_all('SELECT * FROM modifikatori WHERE lokal_id=? ORDER BY naziv', [$lid]) as $mm)
+    $modMap[(int)$mm['artikal_id']][] = ['id'=>(int)$mm['id'],'naziv'=>$mm['naziv'],'cena'=>(float)$mm['cena']];
 
 function tile_boja($a){ return $a['boja'] ?: ($a['kat_boja'] ?: '#b1662c'); }
 function kolq($v){ return rtrim(rtrim(number_format((float)$v,3,',','.'),'0'),',') ?: '0'; }
@@ -156,6 +177,7 @@ require __DIR__ . '/../partials/layout_top.php';
         <td class="num"><?= kolq($a['zaliha']) ?> <?php if($nisko):?><span class="badge badge--warn">nisko</span><?php endif;?></td>
         <?php if ($mozeMenjati): ?>
         <td class="text-right" style="white-space:nowrap">
+          <button class="btn btn--ghost btn--sm" onclick='openMods(<?= (int)$a['id'] ?>, <?= json_encode($a['naziv'], JSON_HEX_APOS|JSON_HEX_QUOT) ?>)' title="Modifikatori / doplate">Doplate (<?= count($modMap[(int)$a['id']] ?? []) ?>)</button>
           <button class="btn btn--ghost btn--sm" onclick='openArtikal(<?= json_encode([
               "id"=>$a["id"],"naziv"=>$a["naziv"],"opis"=>$a["opis"],"jedinica_mere"=>$a["jedinica_mere"],
               "nabavna_cena"=>$a["nabavna_cena"],"prodajna_cena"=>$a["prodajna_cena"],
@@ -221,6 +243,25 @@ require __DIR__ . '/../partials/layout_top.php';
   </form>
 </dialog>
 <script>
+const MODIF = <?= json_encode($modMap, JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
+function escM(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function fmtM(n){return (+n||0).toLocaleString('sr-RS',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function openMods(aid, naziv){
+  document.getElementById('mods_art_id').value = aid;
+  document.getElementById('mods_naziv').textContent = naziv;
+  var list = MODIF[aid] || [];
+  document.getElementById('mods_list').innerHTML = list.length
+    ? list.map(function(m){ return '<div class="flex items-center gap-2" style="padding:8px 10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px">'
+        +'<span style="flex:1;font-weight:600">'+escM(m.naziv)+'</span>'
+        +'<span class="badge badge--teal">+'+fmtM(m.cena)+' RSD</span>'
+        +'<button type="button" class="btn btn--ghost btn--sm" style="color:var(--danger)" onclick="delMod('+m.id+')">×</button></div>'; }).join('')
+    : '<div class="empty" style="padding:16px">Nema doplata za ovaj artikal.</div>';
+  document.getElementById('mMods').showModal();
+}
+function delMod(id){
+  var f=document.getElementById('modDelForm');
+  SankUI.confirm('Obrisati ovu doplatu?',{danger:true,ok:'Obriši'}).then(function(ok){ if(ok){ f.id.value=id; f.submit(); } });
+}
 function openArtikal(a){
   a=a||{};
   a_id.value=a.id||0; a_title.textContent=a.id?'Izmena artikla':'Novi artikal';
@@ -232,6 +273,24 @@ function openArtikal(a){
   mArtikal.showModal();
 }
 </script>
+<?php endif; ?>
+
+<?php if ($mozeMenjati): ?>
+<dialog id="mMods" class="modal">
+  <div class="card__head"><div class="card__title">Doplate — <span id="mods_naziv"></span></div>
+    <button type="button" class="btn btn--ghost btn--sm" onclick="mMods.close()">✕</button></div>
+  <div class="card__body">
+    <p class="muted" style="margin-top:0">Npr. „Ekstra sir +50", „Veliko +30". Konobar bira pri kucanju — doplata se dodaje na cenu.</p>
+    <div id="mods_list"></div>
+    <form method="post" action="<?= url('artikli') ?>" class="flex gap-2" style="margin-top:14px">
+      <?= csrf_field() ?><input type="hidden" name="akcija" value="mod_dodaj"><input type="hidden" name="artikal_id" id="mods_art_id">
+      <input class="input" name="naziv" placeholder="Naziv (npr. Ekstra sir)" required style="flex:2">
+      <input class="input" type="number" step="0.01" name="cena" placeholder="+RSD" required style="flex:1">
+      <button class="btn btn--primary">Dodaj</button>
+    </form>
+  </div>
+</dialog>
+<form id="modDelForm" method="post" action="<?= url('artikli') ?>" style="display:none"><?= csrf_field() ?><input type="hidden" name="akcija" value="mod_obrisi"><input type="hidden" name="id"></form>
 <?php endif; ?>
 
 <?php require __DIR__ . '/../partials/layout_bottom.php'; ?>

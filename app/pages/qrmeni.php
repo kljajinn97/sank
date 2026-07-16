@@ -69,7 +69,7 @@ require __DIR__ . '/../partials/layout_top.php';
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+<script src="<?= asset('assets/js/qrcode.min.js') ?>"></script>
 <script>
 (function(){
   try {
