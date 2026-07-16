@@ -182,11 +182,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         db_run('INSERT INTO zalihe_promet (lokal_id,artikal_id,tip,kolicina,razlog,korisnik_id) VALUES (?,?,"ulaz",?,?,?)', [$lid,$s['artikal_id'],$qty,'Povrat račun #'.$refId,$uid]);
                     }
                 }
-                // Umanji dnevni POS pazar (za dan kad je račun naplaćen)
-                $dan = date('Y-m-d', strtotime($rr['closed_at'] ?: 'now'));
-                $expaz = db_row('SELECT id FROM pazar WHERE lokal_id=? AND datum=? AND napomena="POS promet" LIMIT 1', [$lid,$dan]);
-                if ($expaz) db_run('UPDATE pazar SET iznos=iznos-?, kes=kes-?, kartica=kartica-? WHERE id=?',
-                                   [(float)$rr['ukupno'],(float)$rr['placeno_kes'],(float)$rr['placeno_kartica'],$expaz['id']]);
                 db_run('UPDATE racuni SET status="refundiran", refund_razlog=? WHERE id=?', [$razlog,$refId]);
                 $pdo->commit();
                 audit('refund','racun',$refId,$razlog.' ('.novac($rr['ukupno']).')');
@@ -270,12 +265,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                            [$lid,$s['artikal_id'],$qty,'Prodaja račun #'.$rid,$uid]);
                 }
             }
+            // Račun je račun — pazar (ručni dnevni upis) se NE dira automatski.
             db_run('UPDATE racuni SET status="placen", nacin_placanja=?, placeno_kes=?, placeno_kartica=?, ukupno=?, closed_at=NOW() WHERE id=?',
                    [$nacin,$kes,$kartica,$total,$rid]);
-            // Pazar = DNEVNI zbir (ceo dan), NE red po računu. Upsert jednog reda za danas.
-            $expaz = db_row('SELECT id FROM pazar WHERE lokal_id=? AND datum=CURDATE() AND napomena="POS promet" LIMIT 1', [$lid]);
-            if ($expaz) db_run('UPDATE pazar SET iznos=iznos+?, kes=kes+?, kartica=kartica+? WHERE id=?', [$total,$kes,$kartica,$expaz['id']]);
-            else db_run('INSERT INTO pazar (lokal_id,datum,smena,korisnik_id,iznos,kes,kartica,napomena) VALUES (?,CURDATE(),"cela",?,?,?,?,"POS promet")', [$lid,$uid,$total,$kes,$kartica]);
             $pdo->commit();
             audit('naplata','racun',$rid,'Iznos '.novac($total).' · '.$nacin);
             flash('success','Račun #'.$rid.' naplaćen ('.novac($total).' · '.$nacin.').');

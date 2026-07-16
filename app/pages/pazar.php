@@ -44,6 +44,20 @@ $prosek  = $brDana > 0 ? $mesecUk / $brDana : 0;
 
 $smeneLbl = ['prva'=>'Prva smena','druga'=>'Druga smena','cela'=>'Ceo dan'];
 
+// POS podaci za izabrani dan — SAMO za poređenje pri ručnom upisu (ne upisuju se nigde)
+$posDan = $_GET['dan'] ?? date('Y-m-d');
+if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $posDan)) $posDan = date('Y-m-d');
+$imaPOS = modul_aktivan('pos');
+$posSume = null; $posProdato = [];
+if ($imaPOS) {
+    $posSume = db_row("SELECT COUNT(*) br, COALESCE(SUM(ukupno),0) iznos, COALESCE(SUM(placeno_kes),0) kes, COALESCE(SUM(placeno_kartica),0) kartica
+                       FROM racuni WHERE lokal_id=? AND status='placen' AND DATE(closed_at)=?", [$lid,$posDan]);
+    $posProdato = db_all("SELECT rs.naziv, SUM(rs.kolicina) kol, SUM(rs.iznos*(1-r.popust_pct/100)) iznos
+                          FROM racun_stavke rs JOIN racuni r ON r.id=rs.racun_id
+                          WHERE r.lokal_id=? AND r.status='placen' AND DATE(r.closed_at)=?
+                          GROUP BY rs.naziv ORDER BY iznos DESC", [$lid,$posDan]);
+}
+
 $page_title = 'Dnevni pazar';
 $active = 'pazar';
 require __DIR__ . '/../partials/layout_top.php';
@@ -59,6 +73,42 @@ require __DIR__ . '/../partials/layout_top.php';
   <div class="stat"><div class="stat__label">Prosek po danu</div><div class="stat__value"><?= novac($prosek) ?></div>
     <div class="stat__delta"><?= $brDana ?> radnih dana</div></div>
 </div>
+
+<?php if ($imaPOS): ?>
+<div class="card mb-2">
+  <div class="card__head">
+    <div class="card__title">POS za poređenje — šta kasa kaže</div>
+    <form method="get" action="<?= url('pazar') ?>" style="margin:0">
+      <input type="hidden" name="mesec" value="<?= e(sprintf('%04d-%02d',$gy,$gm)) ?>">
+      <input class="input" type="date" name="dan" value="<?= e($posDan) ?>" onchange="this.form.submit()" style="width:auto;padding:7px 10px">
+    </form>
+  </div>
+  <div class="card__body">
+    <div class="flex gap-3" style="flex-wrap:wrap;margin-bottom:<?= $posProdato?'14px':'0' ?>">
+      <span class="badge badge--teal" style="font-size:.88rem;padding:7px 13px">Računa: <strong>&nbsp;<?= (int)$posSume['br'] ?></strong></span>
+      <span class="badge badge--ok" style="font-size:.88rem;padding:7px 13px">Keš: <strong>&nbsp;<?= novac($posSume['kes']) ?></strong></span>
+      <span class="badge badge--info" style="font-size:.88rem;padding:7px 13px">Kartica: <strong>&nbsp;<?= novac($posSume['kartica']) ?></strong></span>
+      <span class="badge badge--warn" style="font-size:.88rem;padding:7px 13px">Ukupno: <strong>&nbsp;<?= novac($posSume['iznos']) ?></strong></span>
+    </div>
+    <?php if ($posProdato): ?>
+    <details>
+      <summary style="cursor:pointer;font-weight:600;color:var(--brand-700)">Prodati artikli za <?= datum($posDan) ?> (<?= count($posProdato) ?>)</summary>
+      <div class="table-wrap" style="margin-top:10px"><table class="table">
+        <thead><tr><th>Artikal</th><th class="num">Količina</th><th class="num">Iznos</th></tr></thead>
+        <tbody>
+        <?php foreach ($posProdato as $pp): ?>
+          <tr><td><?= e($pp['naziv']) ?></td>
+            <td class="num"><?= rtrim(rtrim(number_format((float)$pp['kol'],3,',','.'),'0'),',') ?></td>
+            <td class="num"><?= novac($pp['iznos']) ?></td></tr>
+        <?php endforeach; ?>
+        </tbody>
+      </table></div>
+    </details>
+    <?php else: ?><p class="muted" style="margin:0">Nema POS prodaje za izabrani dan.</p><?php endif; ?>
+    <p class="help" style="margin-top:12px;margin-bottom:0">Ovo je samo informacija sa kase — <strong>stvarno stanje pazara upisuješ ručno</strong> dugmetom „+ Unesi pazar".</p>
+  </div>
+</div>
+<?php endif; ?>
 
 <form class="toolbar" method="get" action="<?= url('pazar') ?>">
   <label class="label" style="margin:0">Mesec:</label>

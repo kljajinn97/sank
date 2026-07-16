@@ -91,12 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
             }
-            // Dnevni POS pazar (za dan naplate)
-            $dan = substr($closed, 0, 10);
-            $expaz = db_row('SELECT id FROM pazar WHERE lokal_id=? AND datum=? AND napomena="POS promet" LIMIT 1', [$lid,$dan]);
-            if ($expaz) db_run('UPDATE pazar SET iznos=iznos+?, kes=kes+?, kartica=kartica+? WHERE id=?', [$total,$kes,$kartica,$expaz['id']]);
-            else db_run('INSERT INTO pazar (lokal_id,datum,smena,korisnik_id,iznos,kes,kartica,napomena) VALUES (?,?,"cela",?,?,?,?,"POS promet")', [$lid,$dan,$uid,$total,$kes,$kartica]);
-
+            // Račun je račun — pazar (ručni dnevni upis) se NE dira automatski.
             $pdo->commit();
             audit('naplata','racun',$rid,'(offline sync) '.novac($total).' · '.$nacin, $lid);
             $rez[] = ['uuid'=>$uuid, 'status'=>'ok', 'id'=>$rid];

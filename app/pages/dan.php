@@ -13,7 +13,9 @@ $jeDanas = ($datum === date('Y-m-d'));
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'zatvori') {
     csrf_check();
     $d = $_POST['dan'] ?? $datum;
-    $pz = db_row('SELECT COALESCE(SUM(iznos),0) iznos, COALESCE(SUM(kes),0) kes, COALESCE(SUM(kartica),0) kartica FROM pazar WHERE lokal_id=? AND datum=?', [$lid,$d]);
+    // Promet dana = iz RAČUNA (izvor istine za POS)
+    $pz = db_row("SELECT COALESCE(SUM(ukupno),0) iznos, COALESCE(SUM(placeno_kes),0) kes, COALESCE(SUM(placeno_kartica),0) kartica
+                  FROM racuni WHERE lokal_id=? AND status='placen' AND DATE(closed_at)=?", [$lid,$d]);
     $br = (int)db_val('SELECT COUNT(*) FROM racuni WHERE lokal_id=? AND status="placen" AND DATE(closed_at)=?', [$lid,$d]);
     db_run('INSERT INTO dnevni_izvestaji (lokal_id,datum,promet,kes,kartica,br_racuna,korisnik_id)
             VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE promet=VALUES(promet),kes=VALUES(kes),kartica=VALUES(kartica),br_racuna=VALUES(br_racuna)',
@@ -43,7 +45,10 @@ foreach ($artikli as $a) {
 }
 
 // Dnevni novčani promet (pazar) + broj računa
-$pz = db_row('SELECT COALESCE(SUM(iznos),0) iznos, COALESCE(SUM(kes),0) kes, COALESCE(SUM(kartica),0) kartica FROM pazar WHERE lokal_id=? AND datum=?', [$lid,$datum]);
+// POS promet dana = iz RAČUNA; ručni pazar (konobarov upis) posebno
+$pz = db_row("SELECT COALESCE(SUM(ukupno),0) iznos, COALESCE(SUM(placeno_kes),0) kes, COALESCE(SUM(placeno_kartica),0) kartica
+              FROM racuni WHERE lokal_id=? AND status='placen' AND DATE(closed_at)=?", [$lid,$datum]);
+$rucno = db_row('SELECT COALESCE(SUM(iznos),0) iznos FROM pazar WHERE lokal_id=? AND datum=?', [$lid,$datum]);
 $brRacuna = (int)db_val('SELECT COUNT(*) FROM racuni WHERE lokal_id=? AND status="placen" AND DATE(closed_at)=?', [$lid,$datum]);
 $zatvoren = db_row('SELECT * FROM dnevni_izvestaji WHERE lokal_id=? AND datum=?', [$lid,$datum]);
 
@@ -76,9 +81,11 @@ require __DIR__ . '/../partials/layout_top.php';
 </div>
 
 <div class="stats mb-2">
-  <div class="stat"><div class="stat__label">Promet (novac)</div><div class="stat__value in"><?= novac($pz['iznos']) ?></div>
-    <div class="stat__delta muted">Keš <?= novac($pz['kes']) ?> · Kartica <?= novac($pz['kartica']) ?></div></div>
-  <div class="stat"><div class="stat__label">Broj računa</div><div class="stat__value"><?= $brRacuna ?></div></div>
+  <div class="stat"><div class="stat__label">POS promet (računi)</div><div class="stat__value in"><?= novac($pz['iznos']) ?></div>
+    <div class="stat__delta muted">Keš <?= novac($pz['kes']) ?> · Kartica <?= novac($pz['kartica']) ?> · <?= $brRacuna ?> računa</div></div>
+  <div class="stat"><div class="stat__label">Ručno upisan pazar</div>
+    <div class="stat__value <?= abs((float)$rucno['iznos']-(float)$pz['iznos'])<0.01?'in':'' ?>"><?= novac($rucno['iznos']) ?></div>
+    <div class="stat__delta <?= abs((float)$rucno['iznos']-(float)$pz['iznos'])<0.01?'up':'' ?>"><?= (float)$rucno['iznos']==0 ? 'nije upisan' : (abs((float)$rucno['iznos']-(float)$pz['iznos'])<0.01 ? 'poklapa se sa POS-om' : 'razlika '.novac((float)$rucno['iznos']-(float)$pz['iznos'])) ?></div></div>
   <div class="stat"><div class="stat__label">Vrednost izlaza (roba)</div><div class="stat__value"><?= novac($sumPromet) ?></div></div>
 </div>
 
