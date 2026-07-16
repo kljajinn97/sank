@@ -1,6 +1,7 @@
 <?php
 /** Popis / inventura */
 require_role(['vlasnik','menadzer']);
+require_modul('popis');
 $lid = current_lokal_id();
 $uid = current_user()['id'];
 

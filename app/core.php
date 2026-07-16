@@ -287,6 +287,54 @@ function pos_terminal_active(): bool
         && (int)($_SESSION['pos_lokal'] ?? 0) === (int)(pos_current_device()['lokal_id'] ?? -1);
 }
 
+// ---------- Moduli po lokalu (uključivanje na klik) ----------
+
+/** Svi moduli koje sistem nudi (ključ => naziv). Jezgro (pazar, roba, izveštaji…) je uvek uključeno. */
+function moduli_def(): array
+{
+    return [
+        'pos'           => 'POS / Kasa (+ uređaji, KDS, offline)',
+        'qrmeni'        => 'QR digitalni meni',
+        'normativi'     => 'Normativi i kalkulacije',
+        'popis'         => 'Popis / inventura',
+        'narudzbenice'  => 'Nabavka (narudžbenice + poređenje cena)',
+        'smene'         => 'Radno vreme',
+        'plate'         => 'Plate i doprinosi',
+        'baksis'        => 'Bakšiš',
+        'fiskalizacija' => 'Fiskalizacija',
+    ];
+}
+
+/** Uključeni moduli lokala. NULL u bazi = SVI uključeni. */
+function lokal_moduli(?int $lid = null): array
+{
+    static $cache = [];
+    $lid = $lid ?? current_lokal_id();
+    if (!$lid) return array_keys(moduli_def());          // super admin / nepoznat lokal → sve
+    if (!isset($cache[$lid])) {
+        $m = db_val('SELECT moduli FROM lokali WHERE id=?', [$lid]);
+        $a = json_decode((string)$m, true);
+        $cache[$lid] = is_array($a)
+            ? array_values(array_intersect($a, array_keys(moduli_def())))
+            : array_keys(moduli_def());
+    }
+    return $cache[$lid];
+}
+
+function modul_aktivan(string $k, ?int $lid = null): bool
+{
+    return in_array($k, lokal_moduli($lid), true);
+}
+
+/** Guard za stranicu modula — ako nije uključen, nazad na tablu */
+function require_modul(string $k): void
+{
+    if (!modul_aktivan($k)) {
+        flash('error', 'Ovaj modul nije uključen za tvoj lokal.');
+        redirect(url('dashboard'));
+    }
+}
+
 /** Happy hour popust (%) ako je trenutno unutar prozora, inače 0 */
 function happy_hour_popust(?array $lokal): float
 {

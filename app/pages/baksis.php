@@ -1,6 +1,7 @@
 <?php
 /** Bakšiš */
 require_role(['vlasnik','menadzer','konobar']);
+require_modul('baksis');
 $lid = current_lokal_id();
 $mozeBrisati = user_has_role(['vlasnik','menadzer']);
 

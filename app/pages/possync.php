@@ -10,6 +10,7 @@ header('Content-Type: application/json; charset=utf-8');
 $device = pos_current_device();
 if (!$device) { http_response_code(403); echo json_encode(['err'=>'Uređaj nije aktiviran.']); exit; }
 $lid = (int)$device['lokal_id'];
+if (!modul_aktivan('pos', $lid)) { http_response_code(403); echo json_encode(['err'=>'POS modul nije uključen.']); exit; }
 
 // ---------- KATALOG ----------
 if (isset($_GET['katalog'])) {

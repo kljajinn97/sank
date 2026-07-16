@@ -1,6 +1,7 @@
 <?php
 /** Radno vreme / evidencija smena */
 require_role(['vlasnik','menadzer']);
+require_modul('smene');
 $lid = current_lokal_id();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

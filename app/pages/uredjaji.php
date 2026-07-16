@@ -1,6 +1,7 @@
 <?php
 /** POS uređaji i aktivacioni kodovi */
 require_role(['vlasnik','menadzer']);
+require_modul('pos');
 $lid = current_lokal_id();
 $uid = current_user()['id'];
 

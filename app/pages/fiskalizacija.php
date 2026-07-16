@@ -1,6 +1,7 @@
 <?php
 /** Podešavanje fiskalizacije (ESIR integracija) */
 require_role(['vlasnik','menadzer']);
+require_modul('fiskalizacija');
 $lid = current_lokal_id();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

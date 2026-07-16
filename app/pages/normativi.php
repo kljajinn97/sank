@@ -1,6 +1,7 @@
 <?php
 /** Normativi (recepture) i kalkulacije cena */
 require_role(['vlasnik','menadzer']);
+require_modul('normativi');
 $lid = current_lokal_id();
 $uid = current_user()['id'];
 $pdv = (float)(db_val('SELECT pdv_stopa FROM lokali WHERE id=?', [$lid]) ?: 20);

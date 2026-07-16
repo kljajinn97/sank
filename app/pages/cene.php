@@ -1,6 +1,7 @@
 <?php
 /** Poređenje cena dobavljača (iz istorije faktura) */
 require_role(['vlasnik','menadzer']);
+require_modul('narudzbenice');
 $lid = current_lokal_id();
 
 $rows = db_all(

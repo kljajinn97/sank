@@ -92,32 +92,32 @@ function nav_item(string $key, string $label, string $route, string $active): vo
           nav_item('lokali','Lokali','admin/lokali',$active);
           nav_item('korisnici','Svi korisnici','admin/korisnici',$active);
         ?>
-      <?php else: $sef = user_has_role(['vlasnik','menadzer']); ?>
-        <div class="nav__label">Pregled</div>
+      <?php else: $sef = user_has_role(['vlasnik','menadzer']); $M = lokal_moduli(); $m = fn($k)=>in_array($k,$M,true); ?>
+        <div class="nav__label"><span class="nav__dot" style="background:#38bdf8"></span>Pregled</div>
         <?php nav_item('dashboard','Kontrolna tabla','dashboard',$active); ?>
 
-        <div class="nav__label">Poslovanje</div>
+        <div class="nav__label"><span class="nav__dot" style="background:var(--brand)"></span>Poslovanje</div>
         <?php
-          nav_item('pos','POS / Kasa','pos',$active);
+          if ($m('pos')) nav_item('pos','POS / Kasa','pos',$active);
           nav_item('pazar','Dnevni pazar','pazar',$active);
           nav_item('fakture','Fakture (prijem robe)','fakture',$active);
-          if ($sef) nav_item('narudzbenice','Narudžbenice','narudzbenice',$active);
+          if ($sef && $m('narudzbenice')) nav_item('narudzbenice','Narudžbenice','narudzbenice',$active);
           nav_item('troskovi','Troškovi i računi','troskovi',$active);
-          if ($sef) nav_item('qrmeni','QR meni','qrmeni',$active);
+          if ($sef && $m('qrmeni')) nav_item('qrmeni','QR meni','qrmeni',$active);
         ?>
 
-        <div class="nav__label">Roba</div>
+        <div class="nav__label"><span class="nav__dot" style="background:#84cc16"></span>Roba</div>
         <?php
           nav_item('artikli','Artikli i cenovnik','artikli',$active);
-          if ($sef) nav_item('normativi','Normativi / recepture','normativi',$active);
+          if ($sef && $m('normativi')) nav_item('normativi','Normativi / recepture','normativi',$active);
           nav_item('zalihe','Zalihe','zalihe',$active);
-          if ($sef) nav_item('popis','Popis / inventura','popis',$active);
+          if ($sef && $m('popis')) nav_item('popis','Popis / inventura','popis',$active);
           nav_item('dobavljaci','Dobavljači','dobavljaci',$active);
-          if ($sef) nav_item('cene','Poređenje cena','cene',$active);
+          if ($sef && $m('narudzbenice')) nav_item('cene','Poređenje cena','cene',$active);
         ?>
 
         <?php if ($sef): ?>
-        <div class="nav__label">Analitika</div>
+        <div class="nav__label"><span class="nav__dot" style="background:#a78bfa"></span>Analitika</div>
         <?php
           nav_item('izvestaji','Izveštaji','izvestaji',$active);
           nav_item('prodaja','Analitika prodaje','prodaja',$active);
@@ -128,19 +128,19 @@ function nav_item(string $key, string $label, string $route, string $active): vo
         ?>
         <?php endif; ?>
 
-        <div class="nav__label">Ljudi</div>
+        <div class="nav__label"><span class="nav__dot" style="background:#f59e0b"></span>Ljudi</div>
         <?php
           if ($sef) nav_item('korisnici','Zaposleni','korisnici',$active);
-          if ($sef) nav_item('smene','Radno vreme','smene',$active);
-          if ($sef) nav_item('plate','Plate i doprinosi','plate',$active);
-          nav_item('baksis','Bakšiš','baksis',$active);
+          if ($sef && $m('smene')) nav_item('smene','Radno vreme','smene',$active);
+          if ($sef && $m('plate')) nav_item('plate','Plate i doprinosi','plate',$active);
+          if ($m('baksis')) nav_item('baksis','Bakšiš','baksis',$active);
         ?>
 
         <?php if ($sef): ?>
-          <div class="nav__label">Podešavanja</div>
+          <div class="nav__label"><span class="nav__dot" style="background:#f472b6"></span>Podešavanja</div>
           <?php
-            nav_item('uredjaji','POS uređaji','uredjaji',$active);
-            nav_item('fiskalizacija','Fiskalizacija','fiskalizacija',$active);
+            if ($m('pos')) nav_item('uredjaji','POS uređaji','uredjaji',$active);
+            if ($m('fiskalizacija')) nav_item('fiskalizacija','Fiskalizacija','fiskalizacija',$active);
             nav_item('backup','Backup i izvoz','backup',$active);
             nav_item('podesavanja','Podešavanja lokala','podesavanja',$active);
           ?>

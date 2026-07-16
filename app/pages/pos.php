@@ -23,6 +23,13 @@ if (pos_terminal_active()) {
     $SHELL_BOT = __DIR__ . '/../partials/layout_bottom.php';
 }
 
+// Modul POS mora biti uključen za lokal
+if (!modul_aktivan('pos', $lid)) {
+    if (!empty($POS_TERMINAL)) { unset($_SESSION['pos_uid']); redirect(url('kasa')); }
+    flash('error', 'POS modul nije uključen za tvoj lokal.');
+    redirect(url('dashboard'));
+}
+
 /** Preračun i keš podataka računa */
 function racun_total(int $rid, int $lid): array {
     $r = db_row('SELECT * FROM racuni WHERE id=? AND lokal_id=?', [$rid,$lid]);

@@ -1,6 +1,7 @@
 <?php
 /** QR meni — podešavanje (vlasnik): link, QR kod, uključivanje */
 require_role(['vlasnik','menadzer']);
+require_modul('qrmeni');
 $lid = current_lokal_id();
 $lokal = db_row('SELECT * FROM lokali WHERE id=?', [$lid]);
 

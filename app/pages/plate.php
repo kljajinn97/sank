@@ -1,6 +1,7 @@
 <?php
 /** Plate i doprinosi */
 require_role(['vlasnik','menadzer']);
+require_modul('plate');
 $lid = current_lokal_id();
 $uid = current_user()['id'];
 

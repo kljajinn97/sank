@@ -2,7 +2,7 @@
 /** Javni QR meni — bez prijave, po tokenu lokala */
 $t = trim($_GET['t'] ?? '');
 $lok = $t !== '' ? db_row('SELECT * FROM lokali WHERE javni_token=? LIMIT 1', [$t]) : null;
-$dostupno = $lok && !empty($lok['meni_aktivan']);
+$dostupno = $lok && !empty($lok['meni_aktivan']) && modul_aktivan('qrmeni', (int)$lok['id']);
 $boja = $lok['boja'] ?? '#b1662c';
 
 $kat = $art = [];

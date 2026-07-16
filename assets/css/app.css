@@ -1018,6 +1018,30 @@ dialog.modal::backdrop { background: rgba(10,15,22,.5); backdrop-filter: blur(3p
   .pin-dots--left { justify-content: center; }
 }
 
+/* ---- Šarene sekcije i brze akcije (manje monotono, i dalje logično) ---- */
+.nav__dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; vertical-align: middle; opacity: .9; }
+.page-head h1 { position: relative; padding-bottom: 8px; }
+.page-head h1::after {
+  content: ""; position: absolute; left: 0; bottom: 0; width: 46px; height: 4px; border-radius: 99px;
+  background: linear-gradient(90deg, var(--brand), var(--accent));
+}
+.qa-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.qa-tile {
+  display: flex; align-items: center; gap: 11px; padding: 14px 16px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 15px;
+  font-weight: 700; color: var(--text); text-decoration: none; box-shadow: var(--shadow-sm);
+  transition: transform .14s, box-shadow .14s, border-color .14s;
+}
+.qa-tile:hover { transform: translateY(-3px); text-decoration: none; box-shadow: var(--shadow);
+  border-color: color-mix(in srgb, var(--qa) 45%, var(--border)); }
+.qa-tile:active { transform: scale(.97); }
+.qa-tile__ic {
+  width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; flex-shrink: 0;
+  background: color-mix(in srgb, var(--qa) 15%, var(--surface)); color: var(--qa);
+}
+.qa-tile__ic svg { width: 20px; height: 20px; }
+:root[data-theme="dark"] .qa-tile__ic { background: color-mix(in srgb, var(--qa) 24%, var(--surface)); }
+
 /* ---- Offline indikator ---- */
 .net-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px color-mix(in srgb, var(--ok) 60%, transparent); }
 .net-dot.off { background: var(--danger); box-shadow: 0 0 8px rgba(220,38,38,.6); animation: netBlink 1.2s infinite; }

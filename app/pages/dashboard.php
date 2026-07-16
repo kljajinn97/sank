@@ -166,6 +166,26 @@ if (is_super_admin()):
     </div>
   <?php endif; ?>
 
+  <?php // Brze akcije (poštuju uključene module)
+    $QA = [];
+    if (modul_aktivan('pos')) $QA[] = ['pos','Otvori kasu','var(--brand)','<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/>'];
+    $QA[] = ['pazar','Unesi pazar','#16a34a','<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>'];
+    $QA[] = ['fakture','Nova faktura','#2563eb','<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>'];
+    $QA[] = ['artikli','Artikli','#d97706','<path d="M20 7 12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>'];
+    if (user_has_role(['vlasnik','menadzer'])) {
+        $QA[] = ['izvestaji','Izveštaji','#7c3aed','<path d="M3 3v18h18M7 15l4-4 3 3 5-6"/>'];
+        $QA[] = ['dan','Zatvori dan','#dc2626','<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4"/>'];
+    }
+  ?>
+  <div class="qa-grid mb-2">
+    <?php foreach ($QA as $q): ?>
+      <a class="qa-tile" href="<?= url($q[0]) ?>" style="--qa: <?= $q[2] ?>">
+        <span class="qa-tile__ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><?= $q[3] ?></svg></span>
+        <span><?= e($q[1]) ?></span>
+      </a>
+    <?php endforeach; ?>
+  </div>
+
   <?php
     $buf = [];
     $flush = function() use (&$buf) { if ($buf) { echo '<div class="stats mb-2">'.implode('',$buf).'</div>'; $buf=[]; } };

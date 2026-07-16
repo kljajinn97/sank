@@ -49,6 +49,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'novi_
     redirect(url('admin/lokali'));
 }
 
+// --- Moduli lokala (paketi) ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'moduli') {
+    csrf_check();
+    $id = (int)($_POST['id'] ?? 0);
+    $svi = array_keys(moduli_def());
+    $izabrani = array_values(array_intersect((array)($_POST['moduli'] ?? []), $svi));
+    // svi štiklirani = NULL (podrazumevano sve)
+    $val = count($izabrani) === count($svi) ? null : json_encode($izabrani);
+    db()->prepare('UPDATE lokali SET moduli=? WHERE id=?')->execute([$val,$id]);
+    flash('success','Moduli lokala su sačuvani.');
+    redirect(url('admin/lokali'));
+}
+
 // --- Suspenduj / aktiviraj ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['akcija'] ?? '') === 'status') {
     csrf_check();
@@ -99,7 +112,13 @@ require __DIR__ . '/../../partials/layout_top.php';
               }
             ?>
           </td>
-          <td class="text-right">
+          <td class="text-right" style="white-space:nowrap">
+            <?php
+              $svi = array_keys(moduli_def());
+              $mArr = json_decode((string)$l['moduli'], true);
+              $ukljuceni = is_array($mArr) ? array_values(array_intersect($mArr,$svi)) : $svi;
+            ?>
+            <button class="btn btn--ghost btn--sm" onclick='openModuli(<?= (int)$l['id'] ?>, <?= json_encode($l['naziv'], JSON_HEX_APOS|JSON_HEX_QUOT) ?>, <?= json_encode($ukljuceni) ?>)'><?= ico('settings',14) ?> Moduli (<?= count($ukljuceni) ?>/<?= count($svi) ?>)</button>
             <form method="post" style="display:inline">
               <?= csrf_field() ?>
               <input type="hidden" name="akcija" value="status">
@@ -114,6 +133,38 @@ require __DIR__ . '/../../partials/layout_top.php';
     </table>
   </div>
 </div>
+
+<!-- Modal: moduli lokala -->
+<dialog id="mModuli" class="modal">
+  <form method="post" action="<?= url('admin/lokali') ?>">
+    <?= csrf_field() ?><input type="hidden" name="akcija" value="moduli"><input type="hidden" name="id" id="mod_id">
+    <div class="card__head"><div class="card__title">Moduli — <span id="mod_naziv"></span></div>
+      <button type="button" class="btn btn--ghost btn--sm" onclick="mModuli.close()">✕</button></div>
+    <div class="card__body">
+      <p class="muted" style="margin-top:0">Uključi module koje ovaj lokal koristi (tvoji paketi). Jezgro sistema je uvek dostupno.</p>
+      <div id="mod_list">
+        <?php foreach (moduli_def() as $mk => $mn): ?>
+          <label class="flex items-center gap-2" style="padding:9px 10px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--surface-2)">
+            <input type="checkbox" name="moduli[]" value="<?= e($mk) ?>" data-mod="<?= e($mk) ?>">
+            <span style="font-weight:600"><?= e($mn) ?></span>
+          </label>
+        <?php endforeach; ?>
+      </div>
+    </div>
+    <div class="modal__foot">
+      <button type="button" class="btn btn--ghost" onclick="mModuli.close()">Otkaži</button>
+      <button class="btn btn--primary">Sačuvaj module</button>
+    </div>
+  </form>
+</dialog>
+<script>
+function openModuli(id, naziv, ukljuceni){
+  document.getElementById('mod_id').value = id;
+  document.getElementById('mod_naziv').textContent = naziv;
+  document.querySelectorAll('#mod_list input[data-mod]').forEach(function(cb){ cb.checked = ukljuceni.indexOf(cb.dataset.mod) !== -1; });
+  document.getElementById('mModuli').showModal();
+}
+</script>
 
 <!-- Modal: novi lokal -->
 <dialog id="modalNovi" style="border:none;border-radius:var(--radius-lg);padding:0;max-width:620px;width:92%;box-shadow:var(--shadow-lg);">

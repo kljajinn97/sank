@@ -55,6 +55,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     redirect(url('kasa'));
 }
 
+// Ako je POS modul isključen za lokal — poruka umesto PIN ekrana
+if ($device && !modul_aktivan('pos', (int)$device['lokal_id'])) {
+    $kasa_title = 'POS isključen';
+    require __DIR__ . '/../partials/kasa_top.php';
+    echo '<div class="kasa-center"><div class="kasa-box">
+      <div class="sidebar__logo" style="width:56px;height:56px;margin:0 auto 14px">'.ico('lock',26).'</div>
+      <h2>POS modul nije uključen</h2>
+      <p class="muted">Ovaj lokal trenutno nema aktivan POS modul. Obrati se administratoru sistema.</p>
+    </div></div>';
+    require __DIR__ . '/../partials/kasa_bottom.php';
+    return;
+}
+
 // Ako je već sve spremno → u prodaju
 if ($device && pos_current_user()) redirect(url('pos'));
 

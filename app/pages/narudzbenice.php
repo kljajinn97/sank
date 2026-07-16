@@ -1,6 +1,7 @@
 <?php
 /** Narudžbenice (nabavka) + predlog nabavke */
 require_role(['vlasnik','menadzer']);
+require_modul('narudzbenice');
 $lid = current_lokal_id();
 $uid = current_user()['id'];
 

@@ -16,6 +16,7 @@ if (!$device) {
     return;
 }
 $lid = (int)$device['lokal_id'];
+if (!modul_aktivan('pos', $lid)) { echo 'POS modul nije uključen za ovaj lokal.'; exit; }
 
 // JSON: stavke u pripremi
 if (isset($_GET['json'])) {
