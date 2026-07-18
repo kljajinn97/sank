@@ -18,6 +18,7 @@ function nav_icon(string $k): string {
       'artikli'   => '<path d="M20 7 12 3 4 7m16 0-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>',
       'pazar'     => '<path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
       'pos'       => '<rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4"/>',
+      'racuni'    => '<path d="M4 2v20l2.5-1.5L9 22l3-1.5L15 22l2.5-1.5L20 22V2l-2.5 1.5L15 2l-3 1.5L9 2 6.5 3.5 4 2z"/><path d="M8 8h8M8 12h8M8 16h5"/>',
       'uredjaji'  => '<rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/>',
       'qrmeni'    => '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M20 20h.01M17 20h.01M20 17h.01"/>',
       'backup'    => '<path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7M7 10l5 5 5-5M12 15V3"/>',
@@ -99,6 +100,7 @@ function nav_item(string $key, string $label, string $route, string $active): vo
         <div class="nav__label"><span class="nav__dot" style="background:var(--brand)"></span>Poslovanje</div>
         <?php
           if ($m('pos')) nav_item('pos','POS / Kasa','pos',$active);
+          if ($sef && $m('pos')) nav_item('racuni','Računi','racuni',$active);
           nav_item('pazar','Dnevni pazar','pazar',$active);
           nav_item('fakture','Fakture (prijem robe)','fakture',$active);
           if ($sef && $m('narudzbenice')) nav_item('narudzbenice','Narudžbenice','narudzbenice',$active);

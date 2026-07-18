@@ -36,6 +36,7 @@ $routes = [
 
     // Lokal
     'pos'        => 'pos.php',
+    'racuni'     => 'racuni.php',
     'artikli'    => 'artikli.php',
     'pazar'      => 'pazar.php',
     'fakture'    => 'fakture.php',

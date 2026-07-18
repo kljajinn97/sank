@@ -663,18 +663,20 @@ if (isset($_GET['racuni'])) {
                      FROM racuni r LEFT JOIN stolovi s ON s.id=r.sto_id LEFT JOIN korisnici k ON k.id=r.korisnik_id
                      WHERE $where ORDER BY r.id DESC LIMIT 300", $par);
     $stBadge = ['otvoren'=>['Otvoren','warn'],'placen'=>['Plaćen','ok'],'storniran'=>['Storniran','muted'],'refundiran'=>['Refundiran','danger']];
-    $qbase = url('pos').'?racuni=1&dan='.urlencode($dan);
+    $rBase = !empty($RACUNI_BO) ? 'racuni' : 'pos';
+    $qbase = url($rBase).'?racuni=1&dan='.urlencode($dan);
+    if (!empty($RACUNI_BO)) { $page_title = 'Računi'; $active = 'racuni'; }
 
     require $SHELL_TOP;
     ?>
     <div class="page-head">
-      <div><a href="<?= url('pos') ?>" class="btn btn--ghost btn--sm" style="margin-bottom:8px"><?= ico('back',16) ?> Nazad</a>
-        <h1>Računi</h1><p>Pregled računa, kopija, storno i povrat.</p></div>
+      <div><?php if (empty($RACUNI_BO)): ?><a href="<?= url('pos') ?>" class="btn btn--ghost btn--sm" style="margin-bottom:8px"><?= ico('back',16) ?> Nazad</a><?php endif; ?>
+        <h1>Računi</h1><p>Pregled svih računa — kopija, storno i povrat.</p></div>
     </div>
-    <form class="toolbar" method="get" action="<?= url('pos') ?>">
+    <form class="toolbar" method="get" action="<?= url($rBase) ?>">
       <input type="hidden" name="racuni" value="1">
       <input class="input" type="date" name="dan" value="<?= $dan==='sve'?'':e($dan) ?>" onchange="this.form.submit()" style="width:auto">
-      <a class="btn btn--ghost btn--sm" href="<?= url('pos') ?>?racuni=1&dan=sve&status=<?= e($fst) ?>">Svi datumi</a>
+      <a class="btn btn--ghost btn--sm" href="<?= url($rBase) ?>?racuni=1&dan=sve&status=<?= e($fst) ?>">Svi datumi</a>
       <div class="spacer"></div>
       <div class="tabs">
         <?php foreach (['sve'=>'Svi','otvoren'=>'Otvoreni','placen'=>'Plaćeni','storniran'=>'Storno','refundiran'=>'Povrat'] as $k=>$lbl): ?>
